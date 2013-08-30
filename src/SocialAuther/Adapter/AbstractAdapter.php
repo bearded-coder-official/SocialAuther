@@ -52,6 +52,9 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     protected $userInfo = null;
 
+
+    abstract public function prepareAuthParams();
+
     /**
      * Constructor
      *
@@ -258,5 +261,10 @@ abstract class AbstractAdapter implements AdapterInterface
         }
 
         return $result;
+    }
+
+    public function getUserInfoRaw()
+    {
+        return $this->userInfo;
     }
 }

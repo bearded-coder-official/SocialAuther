@@ -1,0 +1,122 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "6b78a3b7a5f07fdd22d00bd836721384",
+    "packages": [
+        {
+            "name": "orbisnull/oauthbase",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orbisnull/oauthbase.git",
+                "reference": "909c968515821c4c0601a4d472c81b58a7b9c030"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/orbisnull/oauthbase/zipball/909c968515821c4c0601a4d472c81b58a7b9c030",
+                "reference": "909c968515821c4c0601a4d472c81b58a7b9c030",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "OAuthBase": "src/"
+                }
+            },
+            "notification-url": "http://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Vasiliy Shvakin",
+                    "email": "zen4dev@gmail.com"
+                }
+            ],
+            "description": "Base oauth library",
+            "time": "2013-08-29 16:15:44"
+        },
+        {
+            "name": "orbisnull/orbisrequest",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orbisnull/orbisrequest.git",
+                "reference": "283a3c58554afc23521eb22372060c2299ff8912"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/orbisnull/orbisrequest/zipball/283a3c58554afc23521eb22372060c2299ff8912",
+                "reference": "283a3c58554afc23521eb22372060c2299ff8912",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "OrbisRequest": "src/"
+                }
+            },
+            "notification-url": "http://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0+"
+            ],
+            "authors": [
+                {
+                    "name": "Vasiliy Shvakin",
+                    "email": "zen4dev@gmail.com"
+                }
+            ],
+            "description": "request object",
+            "time": "2013-08-30 06:20:43"
+        },
+        {
+            "name": "orbisnull/twitterauth",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orbisnull/twitterauth.git",
+                "reference": "d606f8624853f428f32a1a6042142a182b07379e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/orbisnull/twitterauth/zipball/d606f8624853f428f32a1a6042142a182b07379e",
+                "reference": "d606f8624853f428f32a1a6042142a182b07379e",
+                "shasum": ""
+            },
+            "require": {
+                "orbisnull/oauthbase": "dev-master"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "TwitterAuth": "src/"
+                }
+            },
+            "notification-url": "http://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Vasiliy Shvakin",
+                    "email": "zen4dev@gmail.com"
+                }
+            ],
+            "description": "twitter auth class (oauth)",
+            "time": "2013-08-29 16:09:30"
+        }
+    ],
+    "packages-dev": [
+
+    ],
+    "aliases": [
+
+    ],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "orbisnull/twitterauth": 20,
+        "orbisnull/orbisrequest": 20
+    },
+    "platform": [
+
+    ],
+    "platform-dev": [
+
+    ]
+}

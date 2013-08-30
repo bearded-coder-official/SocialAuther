@@ -13,6 +13,7 @@
         "psr-0": { "SocialAuther": "src/" }
     },
     "require": {
-
+        "orbisnull/twitterauth" : "dev-master",
+        "orbisnull/orbisrequest": "dev-master"
     }
 }
