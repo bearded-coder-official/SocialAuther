@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "6b78a3b7a5f07fdd22d00bd836721384",
+    "hash": "d32cd17641b4faef3f26584b126c2b75",
     "packages": [
         {
             "name": "orbisnull/oauthbase",
@@ -36,23 +36,23 @@
             "time": "2013-08-29 16:15:44"
         },
         {
-            "name": "orbisnull/orbisrequest",
+            "name": "orbisnull/orbistools",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/orbisnull/orbisrequest.git",
-                "reference": "283a3c58554afc23521eb22372060c2299ff8912"
+                "url": "https://github.com/orbisnull/orbistools.git",
+                "reference": "6d5d67decb3aa9c860a7992bba17db587b703581"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/orbisnull/orbisrequest/zipball/283a3c58554afc23521eb22372060c2299ff8912",
-                "reference": "283a3c58554afc23521eb22372060c2299ff8912",
+                "url": "https://api.github.com/repos/orbisnull/orbistools/zipball/6d5d67decb3aa9c860a7992bba17db587b703581",
+                "reference": "6d5d67decb3aa9c860a7992bba17db587b703581",
                 "shasum": ""
             },
             "type": "library",
             "autoload": {
                 "psr-0": {
-                    "OrbisRequest": "src/"
+                    "OrbisTools": "src/"
                 }
             },
             "notification-url": "http://packagist.org/downloads/",
@@ -65,8 +65,8 @@
                     "email": "zen4dev@gmail.com"
                 }
             ],
-            "description": "request object",
-            "time": "2013-08-30 06:20:43"
+            "description": "request, session and other tools for web development",
+            "time": "2013-09-01 04:04:11"
         },
         {
             "name": "orbisnull/twitterauth",
@@ -111,7 +111,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "orbisnull/twitterauth": 20,
-        "orbisnull/orbisrequest": 20
+        "orbisnull/orbistools": 20
     },
     "platform": [
 

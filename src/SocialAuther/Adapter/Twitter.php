@@ -2,6 +2,7 @@
 
 namespace SocialAuther\Adapter;
 
+use OrbisTools\Session;
 use SocialAuther\Bridge\TwitterAuthSA;
 
 class Twitter extends AbstractAdapter
@@ -11,18 +12,30 @@ class Twitter extends AbstractAdapter
      */
     protected $twAuth;
 
+    /**
+     * @var Session
+     */
+    protected $session;
+
+    protected $sessionClosures = null;
+
     public function prepareAuthParams()
     {
         throw new \LogicException('not used method');
     }
 
-    public function __construct($config)
+    public function __construct($config, Session $session = null)
     {
         if (isset($config['redirect_uri'])) {
             if (strpos($config['redirect_uri'], 'code=') === false) {
                 $config['redirect_uri'] = $config['redirect_uri'] . '&code=twitter';
             }
         }
+
+        if (!is_null($session)) {
+            $this->setSession($session);
+        }
+
         parent::__construct($config);
 
         $this->socialFieldsMap = array(
@@ -36,7 +49,7 @@ class Twitter extends AbstractAdapter
     public function getTwAuth()
     {
         if (is_null($this->twAuth)) {
-            $this->twAuth = new TwitterAuthSA($this->clientId, $this->clientSecret, $this->redirectUri);
+            $this->twAuth = new TwitterAuthSA($this->clientId, $this->clientSecret, $this->redirectUri, $this->getSession());
         }
         return $this->twAuth;
     }
@@ -108,5 +121,39 @@ class Twitter extends AbstractAdapter
         $this->userInfo = $userInfo;
         return true;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getSessionClosures()
+    {
+        return $this->sessionClosures;
+    }
+
+    /**
+     * @param mixed $sessionClosures
+     */
+    public function setSessionClosures(array $sessionClosures)
+    {
+        $this->sessionClosures = $sessionClosures;
+    }
+
+    public function setSession(Session $session)
+    {
+        $this->session = $session;
+    }
+
+    /**
+     * @return \OrbisTools\Session
+     */
+    public function getSession()
+    {
+        if (is_null($this->session)) {
+            $this->session = new Session($this->getSessionClosures());
+        }
+        return $this->session;
+    }
+
+
 
 }

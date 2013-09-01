@@ -2,7 +2,8 @@
 
 namespace SocialAuther\Bridge;
 
-use OrbisRequest\Request;
+use OrbisTools\Request;
+use OrbisTools\Session;
 use TwitterAuth\TwitterAuth;
 
 class TwitterAuthSA
@@ -20,8 +21,6 @@ class TwitterAuthSA
 
     protected $oauthCallback;
 
-
-
     /**
      * @var Request;
      */
@@ -37,7 +36,12 @@ class TwitterAuthSA
      */
     protected $toolsLocal = [];
 
-    function __construct($consumerKey, $consumerSecret, $oauthCallback)
+    /**
+     * @var Session
+     */
+    protected $session;
+
+    function __construct($consumerKey, $consumerSecret, $oauthCallback, Session $session = null)
     {
         if (!$this->isSessionStart()) {
             throw new \LogicException('Session not start for use ' . __CLASS__);
@@ -46,6 +50,7 @@ class TwitterAuthSA
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
         $this->oauthCallback = $oauthCallback;
+        $this->session = $session;
     }
 
     public function getRequest()
@@ -56,9 +61,20 @@ class TwitterAuthSA
         return $this->request;
     }
 
+    /**
+     * @return \OrbisTools\Session
+     */
+    public function getSession()
+    {
+        if (is_null($this->session)) {
+            $this->session = new Session();
+        }
+        return $this->session;
+    }
+
     public function isSessionStart()
     {
-        return session_status() === PHP_SESSION_ACTIVE;
+        return $this->getSession()->status() === PHP_SESSION_ACTIVE;
     }
 
     public function getToolGlobal()
@@ -90,23 +106,26 @@ class TwitterAuthSA
 
     public function sessionSet($name, $value)
     {
-        $_SESSION[$this->sessionVarName($name)] = $value;
+        $name = $this->sessionVarName($name);
+        return $this->getSession()->set($name, $value);
     }
 
     public function sessionGet($name, $default = null)
     {
         $name = $this->sessionVarName($name);
-        return (isset($_SESSION[$name])) ? $_SESSION[$name] : $default;
+        return $this->getSession()->get($name);
     }
 
     public function sessionUnset($name)
     {
-        unset($_SESSION[$this->sessionVarName($name)]);
+        $name  = $this->sessionVarName($name);
+        return $this->getSession()->rm($name);
     }
 
     public function sessionHas($name)
     {
-        return isset($_SESSION[$this->sessionVarName($name)]);
+        $name = $this->sessionVarName($name);
+        return $this->getSession()->has($name);
     }
 
     public function getAuthUrl()
