@@ -43,14 +43,14 @@ class TwitterAuthSA
 
     function __construct($consumerKey, $consumerSecret, $oauthCallback, Session $session = null)
     {
-        if (!$this->isSessionStart()) {
-            throw new \LogicException('Session not start for use ' . __CLASS__);
-        }
-
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
         $this->oauthCallback = $oauthCallback;
         $this->session = $session;
+
+        if (!$this->isSessionStart()) {
+            throw new \LogicException('Session not start for use ' . __CLASS__);
+        }
     }
 
     public function getRequest()
