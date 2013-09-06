@@ -87,13 +87,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getSocialId()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->socialFieldsMap['socialId']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['socialId']];
-        }
-
-        return $result;
+        return $this->getInfoVar('socialId');
     }
 
     /**
@@ -103,29 +97,17 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getEmail()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->socialFieldsMap['email']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['email']];
-        }
-
-        return $result;
+        return $this->getInfoVar('email');
     }
 
-    /**
-     * Get user name or null if it is not set
-     *
-     * @return string|null
-     */
-    public function getName()
+    public function getFirstName()
     {
-        $result = null;
+        return $this->getInfoVar('firstName');
+    }
 
-        if (isset($this->userInfo[$this->socialFieldsMap['name']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['name']];
-        }
-
-        return $result;
+    public function getSecondName()
+    {
+        return $this->getInfoVar('secondName');
     }
 
     /**
@@ -134,13 +116,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getSocialPage()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->socialFieldsMap['socialPage']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['socialPage']];
-        }
-
-        return $result;
+        return $this->getInfoVar('socialPage');
     }
 
     /**
@@ -150,13 +126,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getAvatar()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->socialFieldsMap['avatar']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['avatar']];
-        }
-
-        return $result;
+        return $this->getInfoVar('avatar');
     }
 
     /**
@@ -166,13 +136,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getSex()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->socialFieldsMap['sex']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['sex']];
-        }
-
-        return $result;
+        return $this->getInfoVar('sex');
     }
 
     /**
@@ -182,13 +146,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthday()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->socialFieldsMap['birthday']])) {
-            $result = date('d.m.Y', strtotime($this->userInfo[$this->socialFieldsMap['birthday']]));
-        }
-
-        return $result;
+        return $this->getInfoVar('birthday');
     }
 
     /**
@@ -267,4 +225,32 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         return $this->userInfo;
     }
+
+    protected function getInfoVar($name)
+    {
+        $name = lcfirst($name);
+        if (isset($this->socialFieldsMap[$name])) {
+            $name = $this->socialFieldsMap[$name];
+        }
+        if (!isset($this->userInfo[$name])) {
+            return null;
+        }
+        return $this->userInfo[$name];
+    }
+
+    function __call($name, $arguments)
+    {
+        if (method_exists($this, $name)) {
+            return call_user_func_array([$this, $name], $arguments);
+        }
+
+        if (strpos($name, 'get')===0) {
+            $varName = substr($name, 3);
+            return $this->getInfoVar($varName);
+        }
+
+        throw new \LogicException("method $name not defined in " . __CLASS__);
+    }
+
+
 }

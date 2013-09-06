@@ -10,32 +10,14 @@ class Vk extends AbstractAdapter
 
         $this->socialFieldsMap = array(
             'socialId'   => 'uid',
-            'email'      => 'email',
-            'avatar'     => 'photo_big',
-            'birthday'   => 'bdate'
+            'avatar'     => 'photo',
+            'birthday'   => 'bdate',
+            'token'   => 'token',
+            'firstName' => 'first_name',
+            'secondName' => 'last_name',
         );
 
         $this->provider = 'vk';
-    }
-
-    /**
-     * Get user name or null if it is not set
-     *
-     * @return string|null
-     */
-    public function getName()
-    {
-        $result = null;
-
-        if (isset($this->userInfo['first_name']) && isset($this->userInfo['last_name'])) {
-            $result = $this->userInfo['first_name'] . ' ' . $this->userInfo['last_name'];
-        } elseif (isset($this->userInfo['first_name']) && !isset($this->userInfo['last_name'])) {
-            $result = $this->userInfo['first_name'];
-        } elseif (!isset($this->userInfo['first_name']) && isset($this->userInfo['last_name'])) {
-            $result = $this->userInfo['last_name'];
-        }
-
-        return $result;
     }
 
     /**
@@ -90,13 +72,14 @@ class Vk extends AbstractAdapter
             if (isset($tokenInfo['access_token'])) {
                 $params = array(
                     'uids'         => $tokenInfo['user_id'],
-                    'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo_big',
+                    'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo,city,country',
                     'access_token' => $tokenInfo['access_token']
                 );
 
                 $userInfo = $this->get('https://api.vk.com/method/users.get', $params);
                 if (isset($userInfo['response'][0]['uid'])) {
                     $this->userInfo = $userInfo['response'][0];
+                    $this->userInfo['token'] = $tokenInfo;
                     $result = true;
                 }
             }
