@@ -151,7 +151,7 @@ class TwitterAuthSA
 
     public function checkAuthToken()
     {
-        $oauthToken = $this->getRequest()->getVar(self::VAR_OAUTH_TOKEN);
+        $oauthToken = $this->getRequest()->getParam(self::VAR_OAUTH_TOKEN);
         if (is_null($oauthToken)) {
             return false;
         }

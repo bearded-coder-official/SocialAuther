@@ -10,7 +10,7 @@ class Vk extends AbstractAdapter
 
         $this->socialFieldsMap = array(
             'socialId'   => 'uid',
-            'avatar'     => 'photo',
+            'avatar'     => 'photo_big',
             'birthday'   => 'bdate',
             'token'   => 'token',
             'firstName' => 'first_name',
@@ -72,7 +72,7 @@ class Vk extends AbstractAdapter
             if (isset($tokenInfo['access_token'])) {
                 $params = array(
                     'uids'         => $tokenInfo['user_id'],
-                    'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo,city,country',
+                    'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo_big,city,country',
                     'access_token' => $tokenInfo['access_token']
                 );
 
