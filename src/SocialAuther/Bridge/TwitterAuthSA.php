@@ -2,6 +2,7 @@
 
 namespace SocialAuther\Bridge;
 
+use OrbisTools\Exception;
 use OrbisTools\Request;
 use OrbisTools\Session;
 use TwitterAuth\TwitterAuth;
@@ -49,7 +50,10 @@ class TwitterAuthSA
         $this->session = $session;
 
         if (!$this->isSessionStart()) {
-            throw new \LogicException('Session not start for use ' . __CLASS__);
+            $this->session->start();
+            if (!$this->isSessionStart()) {
+                throw new Exception('Session not started');
+            }
         }
     }
 
