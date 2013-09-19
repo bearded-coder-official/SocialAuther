@@ -14,7 +14,9 @@ class Facebook extends AbstractAdapter
             'name'       => 'name',
             'socialPage' => 'link',
             'sex'        => 'gender',
-            'birthday'   => 'birthday'
+            'birthday'   => 'birthday',
+            'firstName' => 'first_name',
+            'secondName'=> 'last_name',
         );
 
         $this->provider = 'facebook';

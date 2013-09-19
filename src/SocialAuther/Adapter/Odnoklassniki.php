@@ -41,7 +41,9 @@ class Odnoklassniki extends AbstractAdapter
             'name'       => 'name',
             'avatar'     => 'pic_2',
             'sex'        => 'gender',
-            'birthday'   => 'birthday'
+            'birthday'   => 'birthday',
+            'firstName' => 'first_name',
+            'secondName'=> 'last_name',
         );
 
         $this->provider = 'odnoklassniki';

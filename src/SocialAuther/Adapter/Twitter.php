@@ -40,7 +40,7 @@ class Twitter extends AbstractAdapter
 
         $this->socialFieldsMap = array(
             'socialId'   => 'id_str',
-            'avatar'     => 'profile_image_ur',
+            'avatar'     => 'profile_image_url',
         );
 
         $this->provider = 'twitter';
@@ -79,6 +79,34 @@ class Twitter extends AbstractAdapter
 
         return $result;
     }
+
+    public function getFirstName()
+    {
+        $name = $this->getName();
+        $name = explode(' ', $name);
+        if (count($name)<1) {
+            return null;
+        }
+        return reset($name);
+    }
+
+    public function getSecondName()
+    {
+        $name = $this->getName();
+        $name = explode(' ', $name);
+        if (count($name)<2) {
+            return null;
+        }
+        return end($name);
+    }
+
+    public function getAvatar()
+    {
+        $avatarUrl =  parent::getAvatar();
+        $avatarUrl = str_replace('_normal.', '.', $avatarUrl);
+        return $avatarUrl;
+    }
+
 
     /**
      * Get user sex or null if it is not set
