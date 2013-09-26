@@ -11,6 +11,13 @@ namespace SocialAuther\Adapter;
 abstract class AbstractAdapter implements AdapterInterface
 {
     /**
+     * Returned data language
+     *
+     * @var string
+     */
+    protected $lang = 'en';
+
+    /**
      * Social Client ID
      *
      * @var string null
