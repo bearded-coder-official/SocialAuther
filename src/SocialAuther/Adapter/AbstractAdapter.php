@@ -11,6 +11,14 @@ namespace SocialAuther\Adapter;
 abstract class AbstractAdapter implements AdapterInterface
 {
     /**
+     * Language
+     * Usage: Set field 'lang' in constructor array $param.
+     *
+     * @var string
+     */
+    protected $lang = 'en';
+
+    /**
      * Social Client ID
      *
      * @var string null
