@@ -108,11 +108,21 @@ abstract class AbstractAdapter implements AdapterInterface
         return $this->getInfoVar('email');
     }
 
+    /**
+     * Get user first name
+     *
+     * @return string|null
+     */
     public function getFirstName()
     {
         return $this->getInfoVar('firstName');
     }
 
+    /**
+     * Get user second name
+     *
+     * @return string|null
+     */
     public function getSecondName()
     {
         return $this->getInfoVar('secondName');
@@ -120,6 +130,7 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      * Get user social page url or null if it is not set
+     *
      * @return string|null
      */
     public function getSocialPage()
@@ -155,6 +166,39 @@ abstract class AbstractAdapter implements AdapterInterface
     public function getBirthday()
     {
         return $this->getInfoVar('birthday');
+    }
+
+    /**
+     * Get user phone number
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getPhone()
+    {
+        return $this->getInfoVar('phone');
+    }
+
+    /**
+     * Get user country name
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getCountry()
+    {
+        return $this->getInfoVar('country');
+    }
+
+    /**
+     * Get user city name
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getCity()
+    {
+        return $this->getInfoVar('city');
     }
 
     /**
