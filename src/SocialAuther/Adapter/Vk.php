@@ -12,16 +12,19 @@ class Vk extends AbstractAdapter
             'socialId'   => 'uid',
             'avatar'     => 'photo_big',
             'birthday'   => 'bdate',
-            'token'   => 'token',
-            'firstName' => 'first_name',
+            'token'      => 'token',
+            'firstName'  => 'first_name',
             'secondName' => 'last_name',
+            'phone'      => 'mobile_phone',
+            'country'    => 'country_name',
+            'city'       => 'city_name',
         );
 
         $this->provider = 'vk';
     }
 
     /**
-     * Get user social id or null if it is not set
+     * Get user social page or null if it is not set
      *
      * @return string|null
      */
@@ -44,8 +47,98 @@ class Vk extends AbstractAdapter
     public function getSex()
     {
         $result = null;
+
         if (isset($this->userInfo['sex'])) {
             $result = $this->userInfo['sex'] == 1 ? 'female' : 'male';
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get user phone number
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getPhone()
+    {
+        if (isset($this->userInfo['mobile_phone']) && !empty($this->userInfo['mobile_phone'])) {
+            $phone = $this->userInfo['mobile_phone'];
+        }
+
+        elseif (isset($this->userInfo['home_phone']) && !empty($this->userInfo['home_phone'])) {
+            $phone = $this->userInfo['home_phone'];
+        }
+
+        if (isset($phone)) {
+            $phone = explode('|', str_replace(array(',',';'), '|', $phone));
+
+            if (preg_match('/^\+?[0-9 ()-]{7,}$/', $phone[0])) {
+                return trim($phone[0]);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get user country name
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getCountry()
+    {
+        if (isset($this->userInfo['country_name'])) {
+            return $this->userInfo['country_name'];
+        }
+
+        $result = null;
+
+        if (isset($this->userInfo['country']) && isset($this->userInfo['token']['access_token']))
+        {
+            $params = array(
+                'cids'         => $this->userInfo['country'],
+                'access_token' => $this->userInfo['token']['access_token'],
+                'lang'         => $this->lang
+            );
+
+            $countryInfo = $this->get('https://api.vk.com/method/places.getCountryById', $params);
+            if (isset($countryInfo['response'][0]['name'])) {
+                $result = $this->userInfo['country_name'] = $countryInfo['response'][0]['name'];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get user city name
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getCity()
+    {
+        if (isset($this->userInfo['city_name'])) {
+            return $this->userInfo['city_name'];
+        }
+
+        $result = null;
+
+        if (isset($this->userInfo['city']) && isset($this->userInfo['token']['access_token']))
+        {
+            $params = array(
+                'cids'         => $this->userInfo['city'],
+                'access_token' => $this->userInfo['token']['access_token'],
+                'lang'         => $this->lang
+            );
+
+            $cityInfo = $this->get('https://api.vk.com/method/places.getCityById', $params);
+            if (isset($cityInfo['response'][0]['name'])) {
+                $result = $this->userInfo['city_name'] = $cityInfo['response'][0]['name'];
+            }
         }
 
         return $result;
@@ -72,8 +165,9 @@ class Vk extends AbstractAdapter
             if (isset($tokenInfo['access_token'])) {
                 $params = array(
                     'uids'         => $tokenInfo['user_id'],
-                    'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo_big,city,country',
-                    'access_token' => $tokenInfo['access_token']
+                    'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo_big,city,country,contacts',
+                    'access_token' => $tokenInfo['access_token'],
+                    'lang'         => $this->lang
                 );
 
                 $userInfo = $this->get('https://api.vk.com/method/users.get', $params);
