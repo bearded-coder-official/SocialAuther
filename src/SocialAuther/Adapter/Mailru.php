@@ -14,7 +14,9 @@ class Mailru extends AbstractAdapter
             'name'       => 'nick',
             'socialPage' => 'link',
             'avatar'     => 'pic_big',
-            'birthday'   => 'birthday'
+            'birthday'   => 'birthday',
+            'country'    => 'country_name',
+            'city'       => 'city_name'
         );
 
         $this->provider = 'mailru';
@@ -70,7 +72,16 @@ class Mailru extends AbstractAdapter
                 $userInfo = $this->get('http://www.appsmail.ru/platform/api', $params);
 
                 if (isset($userInfo[0]['uid'])) {
-                    $this->userInfo = array_shift($userInfo);
+                    $this->userInfo = $userInfo[0];
+
+                    if (isset($this->userInfo['location']) && is_array($this->userInfo['location']))
+                    {
+                        if (isset($this->userInfo['location']['country']) && isset($this->userInfo['location']['country']['name']))
+                            $this->userInfo['country_name'] = &$this->userInfo['location']['country']['name'];
+
+                        if (isset($this->userInfo['location']['city']) && isset($this->userInfo['location']['city']['name']))
+                            $this->userInfo['city_name'] = &$this->userInfo['location']['city']['name'];
+                    }
                     $result = true;
                 }
             }
