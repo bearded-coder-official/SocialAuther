@@ -14,6 +14,8 @@ class Mailru extends AbstractAdapter
             'name'       => 'nick',
             'socialPage' => 'link',
             'avatar'     => 'pic_big',
+            'firstName'  => 'first_name',
+            'secondName' => 'last_name',
             'birthday'   => 'birthday',
             'country'    => 'country_name',
             'city'       => 'city_name'
