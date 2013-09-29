@@ -12,7 +12,6 @@ abstract class AbstractAdapter implements AdapterInterface
 {
     /**
      * Language
-     * Usage: Set field 'lang' in constructor array $param.
      *
      * @var string
      */
