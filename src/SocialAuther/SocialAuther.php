@@ -38,7 +38,7 @@ class SocialAuther
     }
 
     /**
-     * Call method authenticate() of adater class
+     * Call method authenticate() of adapter class
      *
      * @return bool
      */

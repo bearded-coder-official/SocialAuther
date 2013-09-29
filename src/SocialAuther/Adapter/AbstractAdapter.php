@@ -75,6 +75,10 @@ abstract class AbstractAdapter implements AdapterInterface
             throw new Exception\InvalidArgumentException(
                 __METHOD__ . ' expects an array with keys: `client_id`, `client_secret`, `redirect_uri`'
             );
+        else {
+            if (isset($config['lang']))
+                $this->lang = $config['lang'];
+        }
 
         foreach (array('client_id', 'client_secret', 'redirect_uri') as $param) {
             if (!array_key_exists($param, $config)) {
