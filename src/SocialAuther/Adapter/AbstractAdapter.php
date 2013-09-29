@@ -2,7 +2,8 @@
 /**
  * SocialAuther (http://socialauther.stanislasgroup.com/)
  *
- * @author: Stanislav Protasevich
+ * @author Stanislav Protasevich
+ * @author Andrey Izman <cyborgcms@gmail.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
@@ -50,14 +51,21 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @var array
      */
-    protected $socialFieldsMap = array();
+    protected $fieldsMap = array();
 
     /**
-     * Storage for user info
+     * User info
      *
      * @var array
      */
-    protected $userInfo = null;
+    protected $user = array();
+
+    /**
+     * Server response
+     *
+     * @var array
+     */
+    protected $response = array();
 
 
     abstract public function prepareAuthParams();
@@ -96,9 +104,9 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @return string|null
      */
-    public function getSocialId()
+    public function getId()
     {
-        return $this->getInfoVar('socialId');
+        return $this->getInfoVar('id');
     }
 
     /**
@@ -136,19 +144,19 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @return string|null
      */
-    public function getSocialPage()
+    public function getPage()
     {
-        return $this->getInfoVar('socialPage');
+        return $this->getInfoVar('page');
     }
 
     /**
-     * Get url of user's avatar or null if it is not set
+     * Get user big image url or null if it is not set
      *
      * @return string|null
      */
-    public function getAvatar()
+    public function getImage()
     {
-        return $this->getInfoVar('avatar');
+        return $this->getInfoVar('image');
     }
 
     /**
@@ -162,13 +170,54 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * Get user birthday in format dd.mm.YYYY or null if it is not set
+     * Get user birthdate in format dd.mm.YYYY or null if it is not set
      *
+     * @author Andrey Izman <cyborgcms@gmail.com>
      * @return string|null
      */
-    public function getBirthday()
+    public function getBirthDate()
     {
-        return $this->getInfoVar('birthday');
+        $day = $this->getBirthDay();
+        $month = $this->getBirthMonth();
+        $year = $this->getBirthYear();
+
+        if (!is_null($day) || !is_null($month) || !is_null($year)) {
+            return sprintf('%02d.%02d.%04d', $day, $month, $year);
+        }
+        return null;
+    }
+
+    /**
+     * Get user birth day or null if it is not set
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return integer|null
+     */
+    public function getBirthDay()
+    {
+        return $this->getInfoVar('birthDay');
+    }
+
+    /**
+     * Get user birth month or null if it is not set
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return integer|null
+     */
+    public function getBirthMonth()
+    {
+        return $this->getInfoVar('birthMonth');
+    }
+
+    /**
+     * Get user birth year or null if it is not set
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return integer|null
+     */
+    public function getBirthYear()
+    {
+        return $this->getInfoVar('birthYear');
     }
 
     /**
@@ -276,36 +325,60 @@ abstract class AbstractAdapter implements AdapterInterface
         return $result;
     }
 
-    public function getUserInfoRaw()
-    {
-        return $this->userInfo;
-    }
-
+    /**
+     * Get user data field
+     *
+     * @param string $name
+     * @return mixed|NULL
+     */
     protected function getInfoVar($name)
     {
         $name = lcfirst($name);
-        if (isset($this->socialFieldsMap[$name])) {
-            $name = $this->socialFieldsMap[$name];
+        if (isset($this->user[$name])) {
+            return $this->user[$name];;
         }
-        if (!isset($this->userInfo[$name])) {
-            return null;
-        }
-        return $this->userInfo[$name];
+        return null;
     }
 
-    function __call($name, $arguments)
+    /**
+     * Parse user data
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @param array $response
+     */
+    protected function parseUserData($response)
     {
-        if (method_exists($this, $name)) {
-            return call_user_func_array([$this, $name], $arguments);
-        }
+        $this->user = array();
+        $this->response = $response;
 
-        if (strpos($name, 'get')===0) {
-            $varName = substr($name, 3);
-            return $this->getInfoVar($varName);
+        foreach (array('id', 'firstName', 'secondName', 'sex', 'email', 'page', 'image', 'phone', 'country', 'city') as $key)
+        {
+            if (isset($this->fieldsMap[$key]) && isset($response[$this->fieldsMap[$key]])) {
+                $this->user[$key] = $response[$this->fieldsMap[$key]];
+            }
         }
-
-        throw new \LogicException("method $name not defined in " . __CLASS__);
     }
 
+    /**
+     * Magic method to getting user data fields as properties.
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @param string $name field name
+     * @throws \LogicException
+     * @return mixed
+     */
+    function __get($name)
+    {
+        if ($name === 'provider')
+            return $this->provider;
+
+        $method = 'get'.ucfirst($name);
+
+        if (method_exists($this, $method)) {
+            return call_user_func(array($this, $method));
+        }
+
+        throw new \LogicException("Property $name not defined in " . __CLASS__);
+    }
 
 }
