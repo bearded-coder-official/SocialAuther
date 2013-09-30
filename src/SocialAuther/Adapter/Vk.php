@@ -8,16 +8,11 @@ class Vk extends AbstractAdapter
     {
         parent::__construct($config);
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'uid',
-            'avatar'     => 'photo_big',
-            'birthday'   => 'bdate',
-            'token'      => 'token',
+        $this->fieldsMap = array(
+            'id'         => 'uid',
+            'image'      => 'photo_big',
             'firstName'  => 'first_name',
             'secondName' => 'last_name',
-            'phone'      => 'mobile_phone',
-            'country'    => 'country_name',
-            'city'       => 'city_name',
         );
 
         $this->provider = 'vk';
@@ -28,15 +23,13 @@ class Vk extends AbstractAdapter
      *
      * @return string|null
      */
-    public function getSocialPage()
+    public function getPage()
     {
-        $result = null;
-
-        if (isset($this->userInfo['screen_name'])) {
-            $result = 'http://vk.com/' . $this->userInfo['screen_name'];
+        if (isset($this->response['screen_name'])) {
+            return 'http://vk.com/' . $this->response['screen_name'];
         }
 
-        return $result;
+        return null;
     }
 
     /**
@@ -46,13 +39,11 @@ class Vk extends AbstractAdapter
      */
     public function getSex()
     {
-        $result = null;
-
-        if (isset($this->userInfo['sex'])) {
-            $result = $this->userInfo['sex'] == 1 ? 'female' : 'male';
+        if (isset($this->response['sex'])) {
+            return $this->response['sex'] == 1 ? 'female' : 'male';
         }
 
-        return $result;
+        return null;
     }
 
     /**
@@ -63,12 +54,12 @@ class Vk extends AbstractAdapter
      */
     public function getPhone()
     {
-        if (isset($this->userInfo['mobile_phone']) && !empty($this->userInfo['mobile_phone'])) {
-            $phone = $this->userInfo['mobile_phone'];
+        if (isset($this->response['mobile_phone']) && !empty($this->response['mobile_phone'])) {
+            $phone = $this->response['mobile_phone'];
         }
 
-        elseif (isset($this->userInfo['home_phone']) && !empty($this->userInfo['home_phone'])) {
-            $phone = $this->userInfo['home_phone'];
+        elseif (isset($this->response['home_phone']) && !empty($this->response['home_phone'])) {
+            $phone = $this->response['home_phone'];
         }
 
         if (isset($phone)) {
@@ -90,27 +81,21 @@ class Vk extends AbstractAdapter
      */
     public function getCountry()
     {
-        if (isset($this->userInfo['country_name'])) {
-            return $this->userInfo['country_name'];
-        }
-
-        $result = null;
-
-        if (isset($this->userInfo['country']) && isset($this->userInfo['token']['access_token']))
+        if (isset($this->response['country']) && isset($this->response['token']['access_token']))
         {
             $params = array(
-                'cids'         => $this->userInfo['country'],
-                'access_token' => $this->userInfo['token']['access_token'],
+                'cids'         => $this->response['country'],
+                'access_token' => $this->response['token']['access_token'],
                 'lang'         => $this->lang
             );
 
             $countryInfo = $this->get('https://api.vk.com/method/places.getCountryById', $params);
             if (isset($countryInfo['response'][0]['name'])) {
-                $result = $this->userInfo['country_name'] = $countryInfo['response'][0]['name'];
+                return $countryInfo['response'][0]['name'];
             }
         }
 
-        return $result;
+        return null;
     }
 
     /**
@@ -121,27 +106,21 @@ class Vk extends AbstractAdapter
      */
     public function getCity()
     {
-        if (isset($this->userInfo['city_name'])) {
-            return $this->userInfo['city_name'];
-        }
-
-        $result = null;
-
-        if (isset($this->userInfo['city']) && isset($this->userInfo['token']['access_token']))
+        if (isset($this->response['city']) && isset($this->response['token']['access_token']))
         {
             $params = array(
-                'cids'         => $this->userInfo['city'],
-                'access_token' => $this->userInfo['token']['access_token'],
+                'cids'         => $this->response['city'],
+                'access_token' => $this->response['token']['access_token'],
                 'lang'         => $this->lang
             );
 
             $cityInfo = $this->get('https://api.vk.com/method/places.getCityById', $params);
             if (isset($cityInfo['response'][0]['name'])) {
-                $result = $this->userInfo['city_name'] = $cityInfo['response'][0]['name'];
+                return $cityInfo['response'][0]['name'];
             }
         }
 
-        return $result;
+        return null;
     }
 
     /**
@@ -151,8 +130,6 @@ class Vk extends AbstractAdapter
      */
     public function authenticate()
     {
-        $result = false;
-
         if (isset($_GET['code'])) {
             $params = array(
                 'client_id' => $this->clientId,
@@ -171,15 +148,24 @@ class Vk extends AbstractAdapter
                 );
 
                 $userInfo = $this->get('https://api.vk.com/method/users.get', $params);
-                if (isset($userInfo['response'][0]['uid'])) {
-                    $this->userInfo = $userInfo['response'][0];
-                    $this->userInfo['token'] = $tokenInfo;
-                    $result = true;
+                if (isset($userInfo['response'][0]['uid']))
+                {
+                    $this->parseUserData($userInfo['response'][0]);
+                    $this->response['token'] = $tokenInfo;
+
+                    if (isset($this->response['bdate'])) {
+                        $birthDate = explode('.', $this->response['bdate']);
+                        $this->userInfo['birthDay']   = isset($birthDate[0]) ? $birthDate[0] : null;
+                        $this->userInfo['birthMonth'] = isset($birthDate[1]) ? $birthDate[1] : null;
+                        $this->userInfo['birthYear']  = isset($birthDate[2]) ? $birthDate[2] : null;
+                    }
+
+                    return true;
                 }
             }
         }
 
-        return $result;
+        return false;
     }
 
     /**
