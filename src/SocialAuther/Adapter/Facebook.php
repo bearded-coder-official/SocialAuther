@@ -8,18 +8,29 @@ class Facebook extends AbstractAdapter
     {
         parent::__construct($config);
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'id',
+        $this->fieldsMap = array(
+            'id'         => 'id',
             'email'      => 'email',
-            'name'       => 'name',
-            'socialPage' => 'link',
-            'sex'        => 'gender',
-            'birthday'   => 'birthday',
-            'firstName' => 'first_name',
-            'secondName'=> 'last_name',
+            'page'       => 'link',
+            'firstName'  => 'first_name',
+            'secondName' => 'last_name',
         );
 
         $this->provider = 'facebook';
+    }
+
+    /**
+     * Get user sex or null if it is not set or restricted
+     *
+     * @return string|null
+     */
+    public function getSex()
+    {
+        if (isset($this->response['gender']) && in_array($this->response['gender'], array('male', 'female'))) {
+            return $this->response['gender'];
+        }
+
+        return null;
     }
 
     /**
@@ -27,14 +38,13 @@ class Facebook extends AbstractAdapter
      *
      * @return string|null
      */
-    public function getAvatar()
+    public function getImage()
     {
-        $result = null;
-        if (isset($this->userInfo['username'])) {
-            $result = 'http://graph.facebook.com/' . $this->userInfo['username'] . '/picture?type=large';
+        if (isset($this->response['username'])) {
+            return 'http://graph.facebook.com/' . $this->response['username'] . '/picture?type=large';
         }
 
-        return $result;
+        return null;
     }
 
     /**
@@ -44,8 +54,6 @@ class Facebook extends AbstractAdapter
      */
     public function authenticate()
     {
-        $result = false;
-
         if (isset($_GET['code'])) {
             $params = array(
                 'client_id'     => $this->clientId,
@@ -57,17 +65,63 @@ class Facebook extends AbstractAdapter
             parse_str($this->get('https://graph.facebook.com/oauth/access_token', $params, false), $tokenInfo);
 
             if (count($tokenInfo) > 0 && isset($tokenInfo['access_token'])) {
-                $params = array('access_token' => $tokenInfo['access_token']);
+                $params = array(
+                    'access_token' => $tokenInfo['access_token']
+                );
+
                 $userInfo = $this->get('https://graph.facebook.com/me', $params);
 
-                if (isset($userInfo['id'])) {
-                    $this->userInfo = $userInfo;
-                    $result = true;
+                if (isset($userInfo['id']))
+                {
+                    if ($this->lang !== 'en' && isset($userInfo['locale']) && $userInfo['locale'] !== 'en_EN')
+                    {
+                        $params['locale'] = $userInfo['locale'];
+                        $userInfo2 = $this->get('https://graph.facebook.com/me', $params);
+
+                        if (isset($userInfo2['id'])) {
+                            $userInfo2['gender'] = $userInfo['gender'];
+                            $userInfo = $userInfo2;
+                        }
+                    }
+
+                    $this->parseUserData($userInfo);
+
+                    if (isset($this->response['birthday'])) {
+                        $birthDate = explode('/', $this->response['birthday']);
+                        $this->userInfo['birthDay']   = isset($birthDate[1]) ? $birthDate[1] : null;
+                        $this->userInfo['birthMonth'] = isset($birthDate[0]) ? $birthDate[0] : null;
+                        $this->userInfo['birthYear']  = isset($birthDate[2]) ? $birthDate[2] : null;
+                    }
+
+                    $fql = array('q' => 'SELECT+current_location,+hometown_location+FROM+user+WHERE+uid='.$this->userInfo['id']);
+                    $location = $this->get('https://graph.facebook.com/fql', array_merge($fql, $params));
+
+                    if (is_array($location) && isset($location['data']) && isset($location['data'][0]))
+                    {
+                        if (isset($location['data'][0]['current_location']) && !empty($location['data'][0]['current_location'])) {
+                            $location = $location['data'][0]['current_location'];
+                        }
+                        elseif (isset($location['data'][0]['hometown_location']) && !empty($location['data'][0]['hometown_location'])) {
+                            $location = $location['data'][0]['hometown_location'];
+                        }
+
+                        if (isset($location)) {
+                            if (isset($location['name']) && !empty($location['name']))
+                                $this->userInfo['city'] = $location['name'];
+                            elseif (isset($location['city']) && !empty($location['city']))
+                                $this->userInfo['city'] = $location['city'];
+
+                            if (isset($location['country']) && !empty($location['country']))
+                            	$this->userInfo['country'] = $location['country'];
+                        }
+                    }
+
+                    return true;
                 }
             }
         }
 
-        return $result;
+        return false;
     }
 
     /**
