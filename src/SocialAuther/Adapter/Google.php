@@ -8,32 +8,17 @@ class Google extends AbstractAdapter
     {
         parent::__construct($config);
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'id',
+        $this->fieldsMap = array(
+            'id'         => 'id',
             'email'      => 'email',
-            'name'       => 'name',
-            'socialPage' => 'link',
-            'avatar'     => 'picture',
-            'sex'        => 'gender'
+            'page'       => 'link',
+            'image'      => 'picture',
+            'sex'        => 'gender',
+            'firstName'  => 'given_name',
+            'secondName' => 'family_name'
         );
 
         $this->provider = 'google';
-    }
-
-    /**
-     * Get user birthday or null if it is not set
-     *
-     * @return string|null
-     */
-    public function getBirthday()
-    {
-        if (isset($this->_userInfo['birthday'])) {
-            $this->_userInfo['birthday'] = str_replace('0000', date('Y'), $this->_userInfo['birthday']);
-            $result = date('d.m.Y', strtotime($this->_userInfo['birthday']));
-        } else {
-            $result = null;
-        }
-        return $result;
     }
 
     /**
@@ -43,8 +28,6 @@ class Google extends AbstractAdapter
      */
     public function authenticate()
     {
-        $result = false;
-
         if (isset($_GET['code'])) {
             $params = array(
                 'client_id'     => $this->clientId,
@@ -60,14 +43,23 @@ class Google extends AbstractAdapter
                 $params['access_token'] = $tokenInfo['access_token'];
 
                 $userInfo = $this->get('https://www.googleapis.com/oauth2/v1/userinfo', $params);
-                if (isset($userInfo[$this->socialFieldsMap['socialId']])) {
-                    $this->userInfo = $userInfo;
-                    $result = true;
+                if (isset($userInfo['id']))
+                {
+                    $this->parseUserData($userInfo);var_dump($this->response);
+
+                    if (isset($this->response['birthday'])) {
+                        $birthDate = explode('-', $this->response['birthday']);
+                        $this->userInfo['birthDay']   = isset($birthDate[2]) ? $birthDate[2] : null;
+                        $this->userInfo['birthMonth'] = isset($birthDate[1]) ? $birthDate[1] : null;
+                        $this->userInfo['birthYear']  = isset($birthDate[0]) ? $birthDate[0] : null;
+                    }
+
+                    return true;
                 }
             }
         }
 
-        return $result;
+        return false;
     }
 
     /**
@@ -83,7 +75,7 @@ class Google extends AbstractAdapter
                 'redirect_uri'  => $this->redirectUri,
                 'response_type' => 'code',
                 'client_id'     => $this->clientId,
-                'scope'         => 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+                'scope'         => 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.google.com/m8/feeds'
             )
         );
     }
