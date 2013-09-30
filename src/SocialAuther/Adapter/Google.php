@@ -13,12 +13,25 @@ class Google extends AbstractAdapter
             'email'      => 'email',
             'page'       => 'link',
             'image'      => 'picture',
-            'sex'        => 'gender',
             'firstName'  => 'given_name',
             'secondName' => 'family_name'
         );
 
         $this->provider = 'google';
+    }
+
+    /**
+     * Get user sex or null if it is not set
+     *
+     * @return string|null
+     */
+    public function getSex()
+    {
+        if (isset($this->response['gender']) && in_array($this->response['gender'], array('male', 'female'))) {
+            return $this->response['gender'];
+        }
+
+        return null;
     }
 
     /**
