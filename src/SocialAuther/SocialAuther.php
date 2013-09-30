@@ -2,7 +2,8 @@
 /**
  * SocialAuther (http://socialauther.stanislasgroup.com/)
  *
- * @author: Stanislav Protasevich
+ * @author Stanislav Protasevich
+ * @author Andrey Izman <cyborgcms@gmail.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
@@ -19,20 +20,24 @@ class SocialAuther
      */
     protected  $adapter = null;
 
+
     /**
      * Constructor.
      *
-     * @param AdapterInterface $adapter
+     * @param string $provider
+     * @param array $config
      * @throws Exception\InvalidArgumentException
+     * @author Andrey Izman <cyborgcms@gmail.com>
      */
-    public function __construct($adapter)
+    public function __construct($provider, $config)
     {
-        if ($adapter instanceof AdapterInterface) {
-            $this->adapter = $adapter;
-        } else {
+        $adapter = '\\SocialAuther\\Adapter\\'.ucfirst(strtolower($provider));
+        try {
+            $this->apapter = new $adapter($config);
+        }
+        catch (Exception $e) {
             throw new Exception\InvalidArgumentException(
-                'SocialAuther only expects instance of the type' .
-                'SocialAuther\Adapter\AdapterInterface.'
+                'Unknown provider "'.$provider.'"'
             );
         }
     }
@@ -48,20 +53,32 @@ class SocialAuther
     }
 
     /**
-     * Call method of this class or methods of adapter class
+     * Call method getAuthUrl() of adapter class
      *
-     * @param $method
-     * @param $params
-     * @return mixed
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string
      */
-    public function __call($method, $params)
+    public function getAuthUrl()
     {
-        if (method_exists($this, $method)) {
-            return $this->$method($params);
+        return $this->adapter->getAuthUrl();
+    }
+
+    /**
+     * Magic method to get SocialUser
+     *
+     * @param string $name
+     * @return \SocialAuther\SocialUser
+     * @throws \LogicException
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     */
+    public function __get($name)
+    {
+        if ($name === 'user')
+        {
+            return $this->adapter->user;
         }
 
-        if (method_exists($this->adapter, $method)) {
-            return $this->adapter->$method();
-        }
+        throw new \InvalidArgumentException("Property $name is not defined in " . __CLASS__);
     }
+
 }

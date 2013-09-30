@@ -54,18 +54,18 @@ abstract class AbstractAdapter implements AdapterInterface
     protected $fieldsMap = array();
 
     /**
-     * User info
-     *
-     * @var array
-     */
-    protected $user = array();
-
-    /**
      * Server response
      *
      * @var array
      */
     protected $response = array();
+
+    /**
+     * User info
+     *
+     * @var \SocialAuther\SocialUser
+     */
+    public $user = null;
 
 
     abstract public function prepareAuthParams();
@@ -177,13 +177,15 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthDate()
     {
-        $day = $this->getBirthDay();
-        $month = $this->getBirthMonth();
-        $year = $this->getBirthYear();
+        $day = $this->user->day;
+        $month = $this->user->month;
+        $year = $this->user->year;
 
-        if (!is_null($day) || !is_null($month) || !is_null($year)) {
+        if (!is_null($day) || !is_null($month) || !is_null($year))
+        {
             return sprintf('%02d.%02d.%04d', $day, $month, $year);
         }
+
         return null;
     }
 
@@ -195,7 +197,8 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthDay()
     {
-        return $this->getInfoVar('birthDay');
+        $day = intval($this->getInfoVar('birthDay'));
+        return ($day > 0 && $day <= 31)? $day: null;
     }
 
     /**
@@ -206,7 +209,8 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthMonth()
     {
-        return $this->getInfoVar('birthMonth');
+        $month = intval($this->getInfoVar('birthMonth'));
+        return ($month > 0 && $month <= 12)? $month: null;
     }
 
     /**
@@ -217,7 +221,8 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthYear()
     {
-        return $this->getInfoVar('birthYear');
+        $year = intval($this->getInfoVar('birthYear'));
+        return ($year > 1900 && $year <= date('Y'))? $year: null;
     }
 
     /**
@@ -357,28 +362,6 @@ abstract class AbstractAdapter implements AdapterInterface
                 $this->user[$key] = $response[$this->fieldsMap[$key]];
             }
         }
-    }
-
-    /**
-     * Magic method to getting user data fields as properties.
-     *
-     * @author Andrey Izman <cyborgcms@gmail.com>
-     * @param string $name field name
-     * @throws \LogicException
-     * @return mixed
-     */
-    function __get($name)
-    {
-        if ($name === 'provider')
-            return $this->provider;
-
-        $method = 'get'.ucfirst($name);
-
-        if (method_exists($this, $method)) {
-            return call_user_func(array($this, $method));
-        }
-
-        throw new \LogicException("Property $name not defined in " . __CLASS__);
     }
 
 }
