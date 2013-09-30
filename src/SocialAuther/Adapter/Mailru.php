@@ -8,17 +8,13 @@ class Mailru extends AbstractAdapter
     {
         parent::__construct($config);
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'uid',
+        $this->fieldsMap = array(
+            'id'         => 'uid',
             'email'      => 'email',
-            'name'       => 'nick',
-            'socialPage' => 'link',
-            'avatar'     => 'pic_big',
+            'page'       => 'link',
+            'image'      => 'pic_big',
             'firstName'  => 'first_name',
             'secondName' => 'last_name',
-            'birthday'   => 'birthday',
-            'country'    => 'country_name',
-            'city'       => 'city_name'
         );
 
         $this->provider = 'mailru';
@@ -31,10 +27,8 @@ class Mailru extends AbstractAdapter
      */
     public function getSex()
     {
-        $result = null;
-
-        if (isset($this->userInfo['sex'])) {
-            $result = $this->userInfo['sex'] == 1 ? 'female' : 'male';
+        if (isset($this->response['sex'])) {
+            $result = $this->response['sex'] == 1 ? 'female' : 'male';
         }
 
         return $result;
@@ -47,8 +41,6 @@ class Mailru extends AbstractAdapter
      */
     public function authenticate()
     {
-        $result = false;
-
         if (isset($_GET['code'])) {
             $params = array(
                 'client_id'     => $this->clientId,
@@ -74,22 +66,30 @@ class Mailru extends AbstractAdapter
                 $userInfo = $this->get('http://www.appsmail.ru/platform/api', $params);
 
                 if (isset($userInfo[0]['uid'])) {
-                    $this->userInfo = $userInfo[0];
+                    $this->parseUserData($userInfo[0]);
 
-                    if (isset($this->userInfo['location']) && is_array($this->userInfo['location']))
+                    if (isset($this->response['location']) && is_array($this->response['location']))
                     {
-                        if (isset($this->userInfo['location']['country']) && isset($this->userInfo['location']['country']['name']))
-                            $this->userInfo['country_name'] = &$this->userInfo['location']['country']['name'];
+                        if (isset($this->response['location']['country']) && isset($this->response['location']['country']['name']))
+                            $this->userInfo['country'] = $this->response['location']['country']['name'];
 
-                        if (isset($this->userInfo['location']['city']) && isset($this->userInfo['location']['city']['name']))
-                            $this->userInfo['city_name'] = &$this->userInfo['location']['city']['name'];
+                        if (isset($this->response['location']['city']) && isset($this->response['location']['city']['name']))
+                            $this->userInfo['city'] = $this->response['location']['city']['name'];
                     }
-                    $result = true;
+
+                    if (isset($this->response['birthday']))
+                    {
+                        $birthDate = explode('.', $this->response['birthday']);
+                        $this->userInfo['birthDay']   = isset($birthDate[0]) ? $birthDate[0] : null;
+                        $this->userInfo['birthMonth'] = isset($birthDate[1]) ? $birthDate[1] : null;
+                        $this->userInfo['birthYear']  = isset($birthDate[2]) ? $birthDate[2] : null;
+                    }
+                    return true;
                 }
             }
         }
 
-        return $result;
+        return false;
     }
 
     /**
