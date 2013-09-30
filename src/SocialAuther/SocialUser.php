@@ -1,0 +1,151 @@
+<?php
+/**
+ * SocialUser
+ *
+ * @author Andrey Izman <cyborgcms@gmail.com>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
+namespace SocialAuther;
+
+use SocialAuther\Adapter\AdapterInterface;
+
+class SocialUser implements \Iterator
+{
+    /**
+     * Adapter manager
+     *
+     * @var AdapterInterface
+     */
+    protected $adapter = null;
+
+    /**
+     * Cached data
+     *
+     * @var array
+     */
+    protected $cache = array();
+
+
+    /**
+     * Allowed user data fields
+     *
+     * @var array
+     */
+    protected $fields = array(
+        'id',
+        'firstName',
+        'secondName',
+        'sex',
+        'email',
+        'page',
+        'image',
+        'phone',
+        'country',
+        'city',
+        'birthDate',
+        'birthDay',
+        'birthMonth',
+        'birthYear'
+    );
+
+
+    /**
+     * Constructor.
+     *
+     * @param AdapterInterface $adapter
+     * @throws Exception\InvalidArgumentException
+     */
+    public function __construct($adapter)
+    {
+        if ($adapter instanceof AdapterInterface) {
+            $this->adapter = $adapter;
+        } else {
+            throw new Exception\InvalidArgumentException(
+                    'SocialUser only expects instance of the type' .
+                    'SocialAuther\Adapter\AdapterInterface.'
+            );
+        }
+    }
+
+    /**
+     * Magic method to getting user data fields as properties
+     *
+     * @param string $name field name
+     * @throws \LogicException
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        if (in_array($name, $this->allowedFields))
+        {
+            if (isset($this->cache[$name]))
+            {
+                return $this->cache[$name];
+            }
+
+            return $this->cache[$name] = call_user_func(array($this->adapter, 'get'.ucfirst($name)));
+        }
+        else if ($name === 'isLogged') {
+            return $this->adapter->isLogged();
+        }
+        else if ($name === 'provider') {
+            return $this->adapter->getPovider();
+        }
+
+        throw new \LogicException("Property $name is not defined in " . __CLASS__);
+    }
+
+    /**
+     * Rewind user data
+     * @see Iterator::rewind()
+     */
+    public function rewind()
+    {
+        reset($this->$allowedFields);
+    }
+
+    /**
+     * Get current value
+     * @see Iterator::current()
+     */
+    public function current()
+    {
+        $field = current($this->fields);
+        return call_user_func(array($this, $field));
+    }
+
+    /**
+     * Get current key
+     * @see Iterator::key()
+     */
+    public function key()
+    {
+        return current($this->fields);
+    }
+
+    /**
+     * Next
+     * @see Iterator::next()
+     */
+    public function next()
+    {
+        $field = next($this->fields);
+
+        if (!$field)
+            return false;
+
+        return call_user_func(array($this, $field));
+    }
+
+    /**
+     * Validation
+     * @see Iterator::valid()
+     */
+    public function valid()
+    {
+        $key = current($this->fields);
+        return ($key !== null && $key !== false);
+    }
+
+}
