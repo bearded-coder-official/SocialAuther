@@ -185,11 +185,11 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthDate()
     {
-        $day = $this->user->birthDay;
-        $month = $this->user->birthMonth;
-        $year = $this->user->birthYear;
+        $day = intval($this->user->birthDay);
+        $month = intval($this->user->birthMonth);
+        $year = intval($this->user->birthYear);
 
-        if (!is_null($day) || !is_null($month) || !is_null($year))
+        if ($day > 0 && $month > 0 && $year > 0)
         {
             return sprintf('%02d.%02d.%04d', $day, $month, $year);
         }
