@@ -63,6 +63,13 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * User info
      *
+     * @var array
+     */
+    protected $userInfo = array();
+
+    /**
+     * SocialUser
+     *
      * @var \SocialAuther\SocialUser
      */
     public $user = null;
@@ -339,8 +346,8 @@ abstract class AbstractAdapter implements AdapterInterface
     protected function getInfoVar($name)
     {
         $name = lcfirst($name);
-        if (isset($this->user[$name])) {
-            return $this->user[$name];;
+        if (isset($this->userInfo[$name])) {
+            return $this->userInfo[$name];;
         }
         return null;
     }
@@ -350,16 +357,24 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @param array $response
+     * @throws Exception\InvalidArgumentException
      */
     protected function parseUserData($response)
     {
-        $this->user = array();
+        if (!is_array($response))
+        {
+            throw new Exception\InvalidArgumentException(
+                 'Invalid param $response on '.__METHOD__
+            );
+        }
+
+        $this->userInfo = array();
         $this->response = $response;
 
         foreach (array('id', 'firstName', 'secondName', 'sex', 'email', 'page', 'image', 'phone', 'country', 'city') as $key)
         {
             if (isset($this->fieldsMap[$key]) && isset($response[$this->fieldsMap[$key]])) {
-                $this->user[$key] = $response[$this->fieldsMap[$key]];
+                $this->userInfo[$key] = $response[$this->fieldsMap[$key]];
             }
         }
     }
