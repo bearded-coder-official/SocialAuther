@@ -31,9 +31,10 @@ class SocialAuther
      */
     public function __construct($provider, $config)
     {
-        $adapter = '\\SocialAuther\\Adapter\\'.ucfirst(strtolower($provider));
+        $adapter = 'SocialAuther\\Adapter\\'.ucfirst(strtolower($provider));
         try {
-            $this->apapter = new $adapter($config);
+            $this->adapter = new $adapter($config);
+
         }
         catch (Exception $e) {
             throw new Exception\InvalidArgumentException(
@@ -68,7 +69,7 @@ class SocialAuther
      *
      * @param string $name
      * @return \SocialAuther\SocialUser
-     * @throws \LogicException
+     * @throws Exception\LogicException
      * @author Andrey Izman <cyborgcms@gmail.com>
      */
     public function __get($name)
@@ -78,7 +79,7 @@ class SocialAuther
             return $this->adapter->user;
         }
 
-        throw new \InvalidArgumentException("Property $name is not defined in " . __CLASS__);
+        throw new Exception\InvalidArgumentException("Property $name is not defined in " . __CLASS__);
     }
 
 }

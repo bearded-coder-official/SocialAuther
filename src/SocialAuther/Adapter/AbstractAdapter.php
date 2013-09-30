@@ -9,6 +9,7 @@
 
 namespace SocialAuther\Adapter;
 
+use SocialAuther\SocialUser;
 abstract class AbstractAdapter implements AdapterInterface
 {
     /**
@@ -184,9 +185,9 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthDate()
     {
-        $day = $this->user->day;
-        $month = $this->user->month;
-        $year = $this->user->year;
+        $day = $this->user->birthDay;
+        $month = $this->user->birthMonth;
+        $year = $this->user->birthYear;
 
         if (!is_null($day) || !is_null($month) || !is_null($year))
         {
@@ -377,6 +378,8 @@ abstract class AbstractAdapter implements AdapterInterface
                 $this->userInfo[$key] = $response[$this->fieldsMap[$key]];
             }
         }
+
+        $this->user = new SocialUser($this);
     }
 
 }

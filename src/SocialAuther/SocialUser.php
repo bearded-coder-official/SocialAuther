@@ -77,7 +77,7 @@ class SocialUser implements \Iterator
      */
     public function __get($name)
     {
-        if (in_array($name, $this->allowedFields))
+        if (in_array($name, $this->fields))
         {
             if (isset($this->cache[$name]))
             {
@@ -102,7 +102,7 @@ class SocialUser implements \Iterator
      */
     public function rewind()
     {
-        reset($this->$allowedFields);
+        reset($this->fields);
     }
 
     /**
@@ -112,7 +112,12 @@ class SocialUser implements \Iterator
     public function current()
     {
         $field = current($this->fields);
-        return call_user_func(array($this, $field));
+
+        if (isset($this->cache[$field])) {
+            return $this->cache[$field];
+        }
+
+        return $this->cache[$field] = call_user_func(array($this->adapter, 'get'.ucfirst($field)));
     }
 
     /**
@@ -125,7 +130,7 @@ class SocialUser implements \Iterator
     }
 
     /**
-     * Next
+     * Get next value
      * @see Iterator::next()
      */
     public function next()
@@ -135,7 +140,11 @@ class SocialUser implements \Iterator
         if (!$field)
             return false;
 
-        return call_user_func(array($this, $field));
+        if (isset($this->cache[$field])) {
+            return $this->cache[$field];
+        }
+
+        return $this->cache[$field] = call_user_func(array($this->adapter, 'get'.ucfirst($field)));
     }
 
     /**
