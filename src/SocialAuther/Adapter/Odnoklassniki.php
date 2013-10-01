@@ -23,6 +23,10 @@ class Odnoklassniki extends AbstractAdapter
             throw new Exception\InvalidArgumentException(
                 __METHOD__ . ' expects an array with keys: `client_id`, `client_secret`, `redirect_uri`, `public_key`'
             );
+        else {
+            if (isset($config['lang']))
+                $this->lang = $config['lang'];
+        }
 
         foreach (array('client_id', 'client_secret', 'redirect_uri', 'public_key') as $param) {
             if (!array_key_exists($param, $config)) {
@@ -35,18 +39,29 @@ class Odnoklassniki extends AbstractAdapter
             }
         }
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'uid',
+        $this->fieldsMap = array(
+            'id'         => 'uid',
             'email'      => 'email',
-            'name'       => 'name',
-            'avatar'     => 'pic_2',
-            'sex'        => 'gender',
-            'birthday'   => 'birthday',
-            'firstName' => 'first_name',
-            'secondName'=> 'last_name',
+            'image'      => 'pic_2',
+            'firstName'  => 'first_name',
+            'secondName' => 'last_name',
         );
 
         $this->provider = 'odnoklassniki';
+    }
+
+    /**
+     * Get user sex or null if it is not set
+     *
+     * @return string|null
+     */
+    public function getSex()
+    {
+        if (isset($this->response['gender']) && in_array($this->response['gender'], array('male', 'female'))) {
+            return $this->response['gender'];
+        }
+
+        return null;
     }
 
     /**
@@ -54,14 +69,13 @@ class Odnoklassniki extends AbstractAdapter
      *
      * @return string|null
      */
-    public function getSocialPage()
+    public function getPage()
     {
-        $result = null;
-        if (isset($this->userInfo['uid'])) {
-            return 'http://www.odnoklassniki.ru/profile/' . $this->userInfo['uid'];
+        if (isset($this->response['uid'])) {
+            return 'http://www.odnoklassniki.ru/profile/' . $this->response['uid'];
         }
 
-        return $result;
+        return null;
     }
 
     /**
@@ -71,8 +85,6 @@ class Odnoklassniki extends AbstractAdapter
      */
     public function authenticate()
     {
-        $result = false;
-
         if (isset($_GET['code'])) {
             $params = array(
                 'code' => $_GET['code'],
@@ -84,7 +96,8 @@ class Odnoklassniki extends AbstractAdapter
 
             $tokenInfo = $this->post('http://api.odnoklassniki.ru/oauth/token.do', $params);
 
-            if (isset($tokenInfo['access_token']) && isset($this->publicKey)) {
+            if (isset($tokenInfo['access_token']) && isset($this->publicKey))
+            {
                 $sign = md5("application_key={$this->publicKey}format=jsonmethod=users.getCurrentUser" . md5("{$tokenInfo['access_token']}{$this->clientSecret}"));
 
                 $params = array(
@@ -98,13 +111,20 @@ class Odnoklassniki extends AbstractAdapter
                 $userInfo = $this->get('http://api.odnoklassniki.ru/fb.do', $params);
 
                 if (isset($userInfo['uid'])) {
-                    $this->userInfo = $userInfo;
-                    $result = true;
+                    $this->parseUserData($userInfo);
+
+                    if (isset($this->response['birthday'])) {
+                        $birthDate = explode('.', $this->response['birthday']);
+                        $this->userInfo['birthDay']   = isset($birthDate[0]) ? $birthDate[0] : null;
+                        $this->userInfo['birthMonth'] = isset($birthDate[1]) ? $birthDate[1] : null;
+                        $this->userInfo['birthYear']  = isset($birthDate[2]) ? $birthDate[2] : null;
+                    }
+                    return true;
                 }
             }
         }
 
-        return $result;
+        return false;
     }
 
     /**
