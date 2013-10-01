@@ -88,6 +88,13 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     abstract protected function prepareAuthParams();
 
+    /**
+     * Call to provider server, get access token, authenticate,
+     * parse user profile data and return result of all this.
+     *
+     * @return boolean
+     */
+    abstract protected function readUserProfile();
 
     /**
      * Constructor
@@ -196,9 +203,9 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthDate()
     {
-        $day = intval($this->user->birthDay);
-        $month = intval($this->user->birthMonth);
-        $year = intval($this->user->birthYear);
+        $day = intval($this->userProfile->birthDay);
+        $month = intval($this->userProfile->birthMonth);
+        $year = intval($this->userProfile->birthYear);
 
         if ($day > 0 && $month > 0 && $year > 0)
         {
@@ -421,7 +428,7 @@ abstract class AbstractAdapter implements AdapterInterface
             }
         }
 
-        $this->userProfile = new \SocialUserProfile($this);
+        $this->userProfile = new \SocialAuther\SocialUserProfile($this);
     }
 
     /**

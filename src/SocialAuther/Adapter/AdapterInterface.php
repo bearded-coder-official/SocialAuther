@@ -11,11 +11,5 @@ namespace SocialAuther\Adapter;
 
 interface AdapterInterface
 {
-    /**
-     * Call to provider server, get access token, authenticate,
-     * parse user profile data and return result of all this.
-     *
-     * @return boolean
-     */
-    protected function readUserProfile();
+
 }
