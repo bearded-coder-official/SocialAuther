@@ -79,6 +79,38 @@ class Odnoklassniki extends AbstractAdapter
     }
 
     /**
+     * Get user country name
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getCountry()
+    {
+        if (isset($this->response['location']) && is_array($this->response['location']))
+        {
+            return isset($this->response['location']['country']) ? $this->response['location']['country'] : null;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get user city name
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getCity()
+    {
+        if (isset($this->response['location']) && is_array($this->response['location']))
+        {
+            return isset($this->response['location']['city']) ? $this->response['location']['city'] : null;
+        }
+
+        return null;
+    }
+
+    /**
      * Call to provider server, get access token, authenticate,
      * parse user profile data and return result of all this.
      *
@@ -114,11 +146,13 @@ class Odnoklassniki extends AbstractAdapter
                 if (isset($userInfo['uid'])) {
                     $this->parseUserData($userInfo);
 
+                    print_r($this->response);
+
                     if (isset($this->response['birthday'])) {
-                        $birthDate = explode('.', $this->response['birthday']);
-                        $this->userInfo['birthDay']   = isset($birthDate[0]) ? $birthDate[0] : null;
+                        $birthDate = explode('-', $this->response['birthday']);
+                        $this->userInfo['birthDay']   = isset($birthDate[2]) ? $birthDate[2] : null;
                         $this->userInfo['birthMonth'] = isset($birthDate[1]) ? $birthDate[1] : null;
-                        $this->userInfo['birthYear']  = isset($birthDate[2]) ? $birthDate[2] : null;
+                        $this->userInfo['birthYear']  = isset($birthDate[0]) ? $birthDate[0] : null;
                     }
                     return true;
                 }
