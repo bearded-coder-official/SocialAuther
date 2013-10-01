@@ -146,8 +146,6 @@ class Odnoklassniki extends AbstractAdapter
                 if (isset($userInfo['uid'])) {
                     $this->parseUserData($userInfo);
 
-                    print_r($this->response);
-
                     if (isset($this->response['birthday'])) {
                         $birthDate = explode('-', $this->response['birthday']);
                         $this->userInfo['birthDay']   = isset($birthDate[2]) ? $birthDate[2] : null;
