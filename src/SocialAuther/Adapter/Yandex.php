@@ -11,7 +11,6 @@ class Yandex extends AbstractAdapter
         $this->fieldsMap = array(
             'id'         => 'id',
             'email'      => 'default_email',
-            'name'       => 'real_name',
             'page'       => 'link',
             'image'      => 'picture'
         );
@@ -63,11 +62,18 @@ class Yandex extends AbstractAdapter
                     $this->parseUserData($userInfo);
 
                     if (isset($this->response['birthday'])) {
-                        $birthDate = explode('.', $this->response['birthday']);
-                        $this->userInfo['birthDay']   = isset($birthDate[0]) ? $birthDate[0] : null;
+                        $birthDate = explode('-', $this->response['birthday']);
+                        $this->userInfo['birthDay']   = isset($birthDate[2]) ? $birthDate[2] : null;
                         $this->userInfo['birthMonth'] = isset($birthDate[1]) ? $birthDate[1] : null;
-                        $this->userInfo['birthYear']  = isset($birthDate[2]) ? $birthDate[2] : null;
+                        $this->userInfo['birthYear']  = isset($birthDate[0]) ? $birthDate[0] : null;
                     }
+
+                    if (isset($this->response['real_name'])) {
+                        $name = explode(' ', $this->response['real_name']);
+                        $this->userInfo['secondName'] = (isset($name[0]) && !empty($name[0])) ? $name[0] : null;
+                        $this->userInfo['firstName'] = (isset($name[1]) && !empty($name[1])) ? $name[1] : null;
+                    }
+
                     return true;
                 }
             }
