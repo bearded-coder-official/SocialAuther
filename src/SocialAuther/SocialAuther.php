@@ -38,48 +38,34 @@ class SocialAuther
         }
         catch (Exception $e) {
             throw new Exception\InvalidArgumentException(
-                'Unknown provider "'.$provider.'"'
+                'Unknown provider : "'.$provider.'"'
             );
         }
     }
 
     /**
-     * Call method authenticate() of adapter class
+     * Call method login() of adapter class.
      *
-     * @return bool
+     * Redirect to provider authentication url or
+     * authenticate and read user profile when redirected back.
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return boolean
      */
-    public function authenticate()
+    public function login()
     {
-        return $this->adapter->authenticate();
+        return $this->adapter->login();
     }
 
     /**
-     * Call method getAuthUrl() of adapter class
+     * Getting user profile
      *
      * @author Andrey Izman <cyborgcms@gmail.com>
-     * @return string
+     * @return \SocialAuther\SocialUserProfile
      */
-    public function getAuthUrl()
+    public function getUserProfile()
     {
-        return $this->adapter->getAuthUrl();
-    }
-
-    /**
-     * Magic method to get SocialUser
-     *
-     * @param string $name
-     * @return \SocialAuther\SocialUser
-     * @throws Exception\LogicException
-     * @author Andrey Izman <cyborgcms@gmail.com>
-     */
-    public function __get($name)
-    {
-        if ($name === 'user')
-        {
-            return $this->adapter->user;
-        }
-
-        throw new Exception\InvalidArgumentException("Property $name is not defined in " . __CLASS__);
+        return $this->adapter->getUserProfile();
     }
 
 }

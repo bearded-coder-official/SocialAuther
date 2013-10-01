@@ -5,11 +5,11 @@
  * @author Stanislav Protasevich
  * @author Andrey Izman <cyborgcms@gmail.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @version 0.2
  */
 
 namespace SocialAuther\Adapter;
 
-use SocialAuther\SocialUser;
 abstract class AbstractAdapter implements AdapterInterface
 {
     /**
@@ -69,14 +69,25 @@ abstract class AbstractAdapter implements AdapterInterface
     protected $userInfo = array();
 
     /**
-     * SocialUser
+     * User profile
      *
-     * @var \SocialAuther\SocialUser
+     * @var \SocialUserProfile
      */
-    public $user = null;
+    protected $userProfile = null;
+
+    /**
+     * Last curl request http code
+     *
+     * @var integer
+     */
+    public $request_http_code = 200;
 
 
-    abstract public function prepareAuthParams();
+    /**
+     * Prepare params for authentication url
+     */
+    abstract protected function prepareAuthParams();
+
 
     /**
      * Constructor
@@ -277,15 +288,34 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * Get authentication url
+     * Redirect to provider authentication url or
+     * authenticate and read user profile when redirected back.
      *
-     * @return string
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @throws Exception\InvalidArgumentException
+     *
+     * @return boolean
      */
-    public function getAuthUrl()
+    public function login()
     {
-        $config = $this->prepareAuthParams();
+        if (isset($_GET['code'])) {
+            return $this->readUserProfile();
+        }
+        else {
+	        $config = $this->prepareAuthParams();
 
-        return $result = $config['auth_url'] . '?' . urldecode(http_build_query($config['auth_params']));
+	        if (isset($config['auth_url']) && isset($config['auth_params'])) {
+	            $login_url = $config['auth_url'] . '?' . urldecode(http_build_query($config['auth_params']));
+	            header('Location: '. $login_url);
+	            exit;
+	        }
+	        else {
+	            throw new Exception\InvalidArgumentException(
+	                'Invalid params on '.ucfirst($this->provider).'::prepareAuthParams()'
+	            );
+	        }
+        }
+        return false;
     }
 
     /**
@@ -299,15 +329,21 @@ abstract class AbstractAdapter implements AdapterInterface
     protected function post($url, $params, $parse = true)
     {
         $curl = curl_init();
+        curl_setopt($curl, CURLOPT_USERAGENT, 'SocialAuther v0.2 http://github.com/mervick/SocialAuther');
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
         curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, urldecode(http_build_query($params)));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
         $result = curl_exec($curl);
+        $this->request_http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
         curl_close($curl);
 
-        if ($parse) {
+        if ($result && $parse) {
             $result = json_decode($result, true);
         }
 
@@ -325,13 +361,19 @@ abstract class AbstractAdapter implements AdapterInterface
     protected function get($url, $params, $parse = true)
     {
         $curl = curl_init();
+        curl_setopt($curl, CURLOPT_USERAGENT, 'SocialAuther v0.2 http://github.com/mervick/SocialAuther' );
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30 );
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30 );
         curl_setopt($curl, CURLOPT_URL, $url . '?' . urldecode(http_build_query($params)));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
         $result = curl_exec($curl);
+        $this->request_http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
         curl_close($curl);
 
-        if ($parse) {
+        if ($result && $parse) {
             $result = json_decode($result, true);
         }
 
@@ -354,7 +396,7 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * Parse user data
+     * Parse user data and create user profile
      *
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @param array $response
@@ -379,7 +421,18 @@ abstract class AbstractAdapter implements AdapterInterface
             }
         }
 
-        $this->user = new SocialUser($this);
+        $this->userProfile = new \SocialUserProfile($this);
+    }
+
+    /**
+     * Get user profile
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return \SocialUserProfile
+     */
+    public function getUserProfile()
+    {
+        return $this->userProfile;
     }
 
 }

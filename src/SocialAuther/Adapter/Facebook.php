@@ -48,11 +48,12 @@ class Facebook extends AbstractAdapter
     }
 
     /**
-     * Authenticate and return bool result of authentication
+     * Call to provider server, get access token, authenticate,
+     * parse user profile data and return result of all this.
      *
-     * @return bool
+     * @return boolean
      */
-    public function authenticate()
+    protected function readUserProfile()
     {
         if (isset($_GET['code'])) {
             $params = array(
@@ -129,7 +130,7 @@ class Facebook extends AbstractAdapter
      *
      * @return array
      */
-    public function prepareAuthParams()
+    protected function prepareAuthParams()
     {
         return array(
             'auth_url'    => 'https://www.facebook.com/dialog/oauth',

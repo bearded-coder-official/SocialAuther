@@ -1,6 +1,6 @@
 <?php
 /**
- * SocialUser
+ * SocialUserProfile
  *
  * @author Andrey Izman <cyborgcms@gmail.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
@@ -10,7 +10,7 @@ namespace SocialAuther;
 
 use SocialAuther\Adapter\AdapterInterface;
 
-class SocialUser implements \Iterator
+class SocialUserProfile implements \Iterator
 {
     /**
      * Adapter manager
@@ -85,9 +85,6 @@ class SocialUser implements \Iterator
             }
 
             return $this->cache[$name] = call_user_func(array($this->adapter, 'get'.ucfirst($name)));
-        }
-        else if ($name === 'isLogged') {
-            return $this->adapter->isLogged();
         }
         else if ($name === 'provider') {
             return $this->adapter->getPovider();
