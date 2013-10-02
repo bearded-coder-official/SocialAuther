@@ -38,11 +38,80 @@ class Twitter extends AbstractAdapter
     }
 
     /**
+     * Get user social page url or null if it is not set
+     *
+     * @return string|null
+     */
+    public function getPage()
+    {
+        return isset($this->response['screen_name']) ? 'http://twitter.com/'.$this->response['screen_name'] : '';
+    }
+
+    /**
+     * Parsing user name.
+     * Used in getFirstName() and getSecondName() methods.
+     * Return user name (e.g. "Andrey Izman")
+     *
+     * @return string|null
+     */
+    public function getName()
+    {
+        if (isset($this->response['name']) && !empty($this->response['name']))
+        {
+            if (!array_key_exists('firstName', $this->userInfo) || !array_key_exists('secondName', $this->userInfo))
+            {
+                if (strpos($this->response['name'], '_') !== false) {
+                    $name = explode('_', $this->response['name']);
+                    $this->response['name'] = str_replace('_', ' ', $this->response['name']);
+                }
+                else {
+                    $name = explode(' ', $this->response['name']);
+                }
+
+                $this->userInfo['firstName'] = trim($name[0]);
+                $this->userInfo['secondName'] = isset($name[1]) ? trim($name[1]) : null;
+            }
+
+            return $this->response['name'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Get user firstName
+     *
+     * @return string|null
+     */
+    public function getFirstName()
+    {
+        if (!array_key_exists('firstName', $this->userInfo)) {
+            $this->getName();
+        }
+
+        return $this->getInfoVar('firstName');
+    }
+
+    /**
+     * Get user secondName
+     *
+     * @return string|null
+     */
+    public function getSecondName()
+    {
+        if (!array_key_exists('secondName', $this->userInfo)) {
+            $this->getName();
+        }
+
+        return $this->getInfoVar('secondName');
+    }
+
+    /**
      * Parsing user location data.
      * Used in getCountry() and getCity() methods.
      * Return user location string (e.g. "San Francisco, CA")
      *
-     * @return string
+     * @return string|null
      */
     public function getLocation()
     {
@@ -279,7 +348,7 @@ class Twitter extends AbstractAdapter
 
 
     /**
-     * Checking for redirect from the provider
+     * Checking for redirect from the provider.
      *
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @return boolean
@@ -290,7 +359,7 @@ class Twitter extends AbstractAdapter
     }
 
     /**
-     * Checking for errors
+     * Checking for errors.
      *
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @return boolean
