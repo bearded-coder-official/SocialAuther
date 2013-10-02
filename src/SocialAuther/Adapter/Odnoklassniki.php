@@ -45,27 +45,15 @@ class Odnoklassniki extends AbstractAdapter
             'image'      => 'pic_2',
             'firstName'  => 'first_name',
             'secondName' => 'last_name',
+            'sex'        => 'gender',
+            'name'       => 'name',
         );
 
         $this->provider = 'odnoklassniki';
     }
 
     /**
-     * Get user sex or null if it is not set
-     *
-     * @return string|null
-     */
-    public function getSex()
-    {
-        if (isset($this->response['gender']) && in_array($this->response['gender'], array('male', 'female'))) {
-            return $this->response['gender'];
-        }
-
-        return null;
-    }
-
-    /**
-     * Get user social id or null if it is not set
+     * Get user social page url or null if it is not set
      *
      * @return string|null
      */
@@ -79,6 +67,29 @@ class Odnoklassniki extends AbstractAdapter
     }
 
     /**
+     * Get user location.
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getLocation()
+    {
+        if (array_key_exists('location', $this->userInfo)) {
+            return $this->userInfo['location'];
+        }
+
+        $location = array();
+
+        if (($city = $this->getCity()) && $city !== null)
+            $location[] = $city;
+
+        if (($country = $this->getCountry()) && $country !== null)
+            $location[] = $country;
+
+        return $this->userInfo['location'] = count($location) > 0 ? implode(', ', $location) : null;
+    }
+
+    /**
      * Get user country name
      *
      * @author Andrey Izman <cyborgcms@gmail.com>
@@ -86,12 +97,15 @@ class Odnoklassniki extends AbstractAdapter
      */
     public function getCountry()
     {
-        if (isset($this->response['location']) && is_array($this->response['location']))
-        {
-            return isset($this->response['location']['country']) ? $this->response['location']['country'] : null;
+        if (array_key_exists('country', $this->userInfo)) {
+            return $this->userInfo['country'];
         }
 
-        return null;
+        if (isset($this->response['location']) && is_array($this->response['location'])) {
+            return $this->userInfo['country'] = isset($this->response['location']['country']) ? ucwords(strtolower($this->response['location']['country'])) : null;
+        }
+
+        return $this->userInfo['country'] = null;
     }
 
     /**
@@ -102,12 +116,15 @@ class Odnoklassniki extends AbstractAdapter
      */
     public function getCity()
     {
-        if (isset($this->response['location']) && is_array($this->response['location']))
-        {
-            return isset($this->response['location']['city']) ? $this->response['location']['city'] : null;
+        if (array_key_exists('city', $this->userInfo)) {
+            return $this->userInfo['city'];
         }
 
-        return null;
+        if (isset($this->response['location']) && is_array($this->response['location'])) {
+            return $this->userInfo['city'] = isset($this->response['location']['city']) ? $this->response['location']['city'] : null;
+        }
+
+        return $this->userInfo['city'] = null;
     }
 
     /**

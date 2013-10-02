@@ -14,23 +14,11 @@ class Facebook extends AbstractAdapter
             'page'       => 'link',
             'firstName'  => 'first_name',
             'secondName' => 'last_name',
+            'sex'        => 'gender',
+            'name'       => 'name',
         );
 
         $this->provider = 'facebook';
-    }
-
-    /**
-     * Get user sex or null if it is not set or restricted
-     *
-     * @return string|null
-     */
-    public function getSex()
-    {
-        if (isset($this->response['gender']) && in_array($this->response['gender'], array('male', 'female'))) {
-            return $this->response['gender'];
-        }
-
-        return null;
     }
 
     /**
@@ -55,7 +43,8 @@ class Facebook extends AbstractAdapter
      */
     protected function readUserProfile()
     {
-        if (isset($_GET['code'])) {
+        if (isset($_GET['code']))
+        {
             $params = array(
                 'client_id'     => $this->clientId,
                 'redirect_uri'  => $this->redirectUri,
@@ -65,7 +54,8 @@ class Facebook extends AbstractAdapter
 
             parse_str($this->get('https://graph.facebook.com/oauth/access_token', $params, false), $tokenInfo);
 
-            if (count($tokenInfo) > 0 && isset($tokenInfo['access_token'])) {
+            if (count($tokenInfo) > 0 && isset($tokenInfo['access_token']))
+            {
                 $params = array(
                     'access_token' => $tokenInfo['access_token']
                 );
@@ -106,14 +96,18 @@ class Facebook extends AbstractAdapter
                             $location = $location['data'][0]['hometown_location'];
                         }
 
-                        if (isset($location)) {
+                        if (isset($location))
+                        {
                             if (isset($location['name']) && !empty($location['name']))
                                 $this->userInfo['city'] = $location['name'];
                             elseif (isset($location['city']) && !empty($location['city']))
                                 $this->userInfo['city'] = $location['city'];
 
                             if (isset($location['country']) && !empty($location['country']))
-                            	$this->userInfo['country'] = $location['country'];
+                                $this->userInfo['country'] = $location['country'];
+
+                            $location = array_intersect_key($this->userInfo, array_flip(array('city', 'country')));
+                            $this->userInfo['location'] = count($location) > 0 ? implode(', ', $location) : null;
                         }
                     }
 

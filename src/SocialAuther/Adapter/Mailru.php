@@ -35,6 +35,32 @@ class Mailru extends AbstractAdapter
     }
 
     /**
+     * Get user location (e.g. "Odessa, Ukraine").
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getLocation()
+    {
+        if (!array_key_exists('location', $this->userInfo))
+        {
+            if (array_key_exists('city', $this->userInfo) && $this->userInfo['city'] !== null) {
+                $location[] = $this->userInfo['city'];
+            }
+            if (isset($this->response['location']) && isset($this->response['location']['region']) && isset($this->response['location']['region']['name'])) {
+                $location[] = $this->response['location']['region']['name'];
+            }
+            if (array_key_exists('country', $this->userInfo) && $this->userInfo['country'] !== null) {
+                $location[] = $this->userInfo['country'];
+            }
+
+            $this->userInfo['location'] = isset($location) ? count($location) > 1 ? implode(', ', $location) : $location[0] : null;
+        }
+
+        return $this->userInfo['location'];
+    }
+
+    /**
      * Call to provider server, get access token, authenticate,
      * parse user profile data and return result of all this.
      *

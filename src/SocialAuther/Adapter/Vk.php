@@ -19,6 +19,17 @@ class Vk extends AbstractAdapter
     }
 
     /**
+     * Get user name
+     *
+     * @return string|null
+     */
+    public function getName()
+    {
+        $name = trim($this->getFirstName() . ' ' . $this->getSecondName());
+        return !empty($name) ? $name : null;
+    }
+
+    /**
      * Get user social page or null if it is not set
      *
      * @return string|null
@@ -39,7 +50,7 @@ class Vk extends AbstractAdapter
      */
     public function getSex()
     {
-        if (isset($this->response['sex'])) {
+        if (isset($this->response['sex']) && in_array($this->response['sex'], array(1, 2), false)) {
             return $this->response['sex'] == 1 ? 'female' : 'male';
         }
 
@@ -74,6 +85,32 @@ class Vk extends AbstractAdapter
     }
 
     /**
+     * Get user location.
+     *
+     * @see \SocialAuther\Adapter\AbstractAdapter::getLocation()
+     * @return string|null
+     */
+    public function getLocation()
+    {
+        if (array_key_exists('country', $this->userInfo)) {
+            return $this->userInfo['location'];
+        }
+        $location = array();
+
+        $country = $this->getCountry();
+        $city = $this->getCity();
+
+        if (!is_null($city)) {
+        	$location[] = $city;
+        }
+        if (!is_null($country)) {
+        	$location[] = $country;
+        }
+
+        return $this->userInfo['location'] = count($location) > 0 ? implode(', ', $location) : null;
+    }
+
+    /**
      * Get user country name
      *
      * @author Andrey Izman <cyborgcms@gmail.com>
@@ -81,7 +118,10 @@ class Vk extends AbstractAdapter
      */
     public function getCountry()
     {
-        if (isset($this->response['country']) && isset($this->response['token']['access_token']))
+        if (array_key_exists('country', $this->userInfo)) {
+            return $this->userInfo['country'];
+        }
+        elseif (isset($this->response['country']) && isset($this->response['token']['access_token']))
         {
             $params = array(
                 'cids'         => $this->response['country'],
@@ -91,11 +131,11 @@ class Vk extends AbstractAdapter
 
             $countryInfo = $this->get('https://api.vk.com/method/places.getCountryById', $params);
             if (isset($countryInfo['response'][0]['name'])) {
-                return $countryInfo['response'][0]['name'];
+                return $this->userInfo['country'] = $countryInfo['response'][0]['name'];
             }
         }
 
-        return null;
+        return $this->userInfo['country'] = null;
     }
 
     /**
@@ -106,7 +146,10 @@ class Vk extends AbstractAdapter
      */
     public function getCity()
     {
-        if (isset($this->response['city']) && isset($this->response['token']['access_token']))
+        if (array_key_exists('city', $this->userInfo)) {
+            return $this->userInfo['city'];
+        }
+        elseif (isset($this->response['city']) && isset($this->response['token']['access_token']))
         {
             $params = array(
                 'cids'         => $this->response['city'],
@@ -116,11 +159,11 @@ class Vk extends AbstractAdapter
 
             $cityInfo = $this->get('https://api.vk.com/method/places.getCityById', $params);
             if (isset($cityInfo['response'][0]['name'])) {
-                return $cityInfo['response'][0]['name'];
+                return $this->userInfo['city'] = $cityInfo['response'][0]['name'];
             }
         }
 
-        return null;
+        return $this->userInfo['city'] = null;
     }
 
     /**

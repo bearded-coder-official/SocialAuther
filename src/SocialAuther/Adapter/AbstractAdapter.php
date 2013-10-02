@@ -85,6 +85,8 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      * Prepare params for authentication url
+     *
+     * @return array Params
      */
     abstract protected function prepareAuthParams();
 
@@ -146,6 +148,23 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
+     * Get user name or null if it is not set
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getName()
+    {
+        if (!array_key_exists('name', $this->userInfo))
+        {
+            $name = trim($this->getInfoVar('firstName'). ' ' .$this->getInfoVar('secondName'));
+            $this->userInfo['name'] = !empty($name) ? $name : null;
+        }
+
+        return $this->userInfo['name'];
+    }
+
+    /**
      * Get user first name
      *
      * @return string|null
@@ -186,13 +205,18 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * Get user sex or null if it is not set
+     * Get user sex or null.
      *
+     * @author Andrey Izman <cyborgcms@gmail.com>
      * @return string|null
      */
     public function getSex()
     {
-        return $this->getInfoVar('sex');
+        if (array_key_exists('sex', $this->userInfo) && in_array($this->userInfo['sex'], array('male', 'female'))) {
+            return $this->userInfo['sex'];
+        }
+
+        return null;
     }
 
     /**
@@ -201,8 +225,9 @@ abstract class AbstractAdapter implements AdapterInterface
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @return string|null
      */
-    public function getBirthDate()
+    final public function getBirthDate()
     {
+        # getting caching data from userProfile
         $day = intval($this->userProfile->birthDay);
         $month = intval($this->userProfile->birthMonth);
         $year = intval($this->userProfile->birthYear);
@@ -221,7 +246,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @return integer|null
      */
-    public function getBirthDay()
+    final public function getBirthDay()
     {
         $day = intval($this->getInfoVar('birthDay'));
         return ($day > 0 && $day <= 31)? $day: null;
@@ -233,7 +258,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @return integer|null
      */
-    public function getBirthMonth()
+    final public function getBirthMonth()
     {
         $month = intval($this->getInfoVar('birthMonth'));
         return ($month > 0 && $month <= 12)? $month: null;
@@ -245,7 +270,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @return integer|null
      */
-    public function getBirthYear()
+    final public function getBirthYear()
     {
         $year = intval($this->getInfoVar('birthYear'));
         return ($year > 1900 && $year <= date('Y'))? $year: null;
@@ -260,6 +285,29 @@ abstract class AbstractAdapter implements AdapterInterface
     public function getPhone()
     {
         return $this->getInfoVar('phone');
+    }
+
+    /**
+     * Get user location (e.g. "Odessa, Ukraine").
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return string|null
+     */
+    public function getLocation()
+    {
+        if (!array_key_exists('location', $this->userInfo))
+        {
+            if (array_key_exists('city', $this->userInfo) && $this->userInfo['city'] !== null) {
+                $location[] = $this->userInfo['city'];
+            }
+            if (array_key_exists('country', $this->userInfo) && $this->userInfo['country'] !== null) {
+                $location[] = $this->userInfo['country'];
+            }
+
+            $this->userInfo['location'] = isset($location) ? count($location) > 1 ? implode(', ', $location) : $location[0] : null;
+        }
+
+        return $this->userInfo['location'];
     }
 
     /**
@@ -415,12 +463,14 @@ abstract class AbstractAdapter implements AdapterInterface
      * @param string $name
      * @return mixed|NULL
      */
-    protected function getInfoVar($name)
+    final protected function getInfoVar($name)
     {
         $name = lcfirst($name);
-        if (isset($this->userInfo[$name])) {
+
+        if (array_key_exists($name, $this->userInfo)) {
             return $this->userInfo[$name];;
         }
+
         return null;
     }
 
@@ -431,7 +481,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @param array $response
      * @throws Exception\InvalidArgumentException
      */
-    protected function parseUserData($response)
+    final protected function parseUserData($response)
     {
         if (!is_array($response))
         {
@@ -443,7 +493,7 @@ abstract class AbstractAdapter implements AdapterInterface
         $this->userInfo = array();
         $this->response = $response;
 
-        foreach (array('id', 'firstName', 'secondName', 'sex', 'email', 'page', 'image', 'phone', 'country', 'city') as $key)
+        foreach (array('id', 'name', 'firstName', 'secondName', 'sex', 'email', 'page', 'image', 'phone', 'location', 'country', 'city') as $key)
         {
             if (isset($this->fieldsMap[$key]) && isset($response[$this->fieldsMap[$key]])) {
                 $this->userInfo[$key] = $response[$this->fieldsMap[$key]];
@@ -459,7 +509,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @author Andrey Izman <cyborgcms@gmail.com>
      * @return \SocialUserProfile
      */
-    public function getUserProfile()
+    final public function getUserProfile()
     {
         return $this->userProfile;
     }

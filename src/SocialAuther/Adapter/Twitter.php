@@ -31,7 +31,7 @@ class Twitter extends AbstractAdapter
         $this->fieldsMap = array(
             'id'         => 'id',
             'image'      => 'profile_image_url',
-
+            'location'   => 'location',
         );
 
         $this->provider = 'twitter';
@@ -109,17 +109,23 @@ class Twitter extends AbstractAdapter
     /**
      * Parsing user location data.
      * Used in getCountry() and getCity() methods.
-     * Return user location string (e.g. "San Francisco, CA")
+     * Return user location string (e.g. "Odessa, Ukraine").
      *
      * @return string|null
      */
     public function getLocation()
     {
-        if (isset($this->response['location']) && is_string($this->response['location']) && !empty($this->response['location']))
+        if (array_key_exists('location', $this->userInfo) && !empty($this->userInfo['location']))
         {
             if (!array_key_exists('city', $this->userInfo) || !array_key_exists('country', $this->userInfo))
             {
-                $loc = explode(',', $this->response['location']);
+                $loc = preg_replace('/[\x03-\x20]{2,}/sxSX', ' ', $this->userInfo['location']);
+                $glue = ',';
+
+                if (strpos($location, $glue) === false) {
+                    $glue = ' ';
+                }
+                $loc = explode($glue, $loc);
 
                 if (count($loc) <= 3) {
                     $this->userInfo['city'] = trim($loc[0]);
@@ -131,10 +137,10 @@ class Twitter extends AbstractAdapter
                 }
             }
 
-            return $this->response['location'];
+            return $this->userInfo['location'];
         }
 
-        return null;
+        return $this->userInfo['location'] = null;
     }
 
     /**

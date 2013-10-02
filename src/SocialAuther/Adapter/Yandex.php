@@ -12,24 +12,12 @@ class Yandex extends AbstractAdapter
             'id'         => 'id',
             'email'      => 'default_email',
             'page'       => 'link',
-            'image'      => 'picture'
+            'image'      => 'picture',
+            'sex'        => 'sex',
+            'name'       => 'display_name',
         );
 
         $this->provider = 'yandex';
-    }
-
-    /**
-     * Get user sex or null if it is not set
-     *
-     * @return string|null
-     */
-    public function getSex()
-    {
-        if (isset($this->response['sex']) && in_array($this->response['sex'], array('male', 'female'))) {
-            return $this->response['sex'];
-        }
-
-        return null;
     }
 
     /**

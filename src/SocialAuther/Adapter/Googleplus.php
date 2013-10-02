@@ -6,6 +6,7 @@ namespace SocialAuther\Adapter;
  * Googleplus adapter
  *
  * @author Andrey Izman <cyborgcms@gmail.com>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 class Googleplus extends AbstractAdapter
 {
@@ -20,24 +21,25 @@ class Googleplus extends AbstractAdapter
 
         $this->fieldsMap = array(
             'id'         => 'id',
-            'page'       => 'url'
+            'page'       => 'url',
+            'sex'        => 'gender',
         );
 
         $this->provider = 'googleplus';
     }
 
     /**
-     * Get user sex or null if it is not set
+     * Get user name
      *
      * @return string|null
      */
-    public function getSex()
+    public function getName()
     {
-        if (isset($this->response['gender']) && in_array($this->response['gender'], array('male', 'female'))) {
-            return $this->response['gender'];
+        if (array_key_exists('displayName', $this->response) && !empty($this->response['displayName'])) {
+            return $this->response['displayName'];
         }
-
-        return null;
+        $name = trim($this->getFirstName() . ' ' . $this->getSecondName());
+        return !empty($name) ? $name : null;
     }
 
     /**
@@ -87,32 +89,53 @@ class Googleplus extends AbstractAdapter
     }
 
     /**
-     * Parsing user location data.
-     * This private method used in getCountry() and getCity() methods
+     * Get user location data.
+     * Used in getCountry() and getCity() methods.
+     *
+     * @return string|null
      */
-    protected function parseLocation()
+    public function getLocation()
     {
-        if (isset($this->response['placesLived']) && is_array($this->response['placesLived']))
+        if (array_key_exists('location', $this->userInfo)) {
+            return $this->userInfo['location'];
+        }
+
+        elseif (isset($this->response['placesLived']) && is_array($this->response['placesLived']))
         {
             foreach ($this->response['placesLived'] as $location)
             {
                 if (isset($location['primary']) && $location['primary'] == 1)
                 {
-                    if (isset($location['value'])) {
-                        $loc = explode(',', $location['value']);
+                    if (isset($location['value']))
+                    {
+                        $loc = preg_replace('/[\x03-\x20]{2,}/sxSX', ' ', $location['value']);
+                        $glue = ',';
+
+                        if (strpos($location, $glue) === false) {
+                            $glue = ' ';
+                        }
+                        $loc = explode($glue, $loc);
 
                         if(count($loc) <= 3) {
-                            $this->userInfo['city'] = $loc[0];
-                            $this->userInfo['country'] = isset($loc[1]) ? isset($loc[2]) ? $loc[2] : $loc[1] : null;
-                            return;
+                            $this->userInfo['city'] = trim($loc[0]);
+                            $this->userInfo['country'] = isset($loc[1]) ? isset($loc[2]) ? trim($loc[2]) : trim($loc[1]) : null;
                         }
+                        else{
+                            $this->userInfo['city'] = null;
+                            $this->userInfo['country'] = null;
+                        }
+
+                        return $this->userInfo['location'] = $location['value'];
                     }
                     break;
                 }
             }
         }
+
         $this->userInfo['city'] = null;
         $this->userInfo['country'] = null;
+
+        return $this->userInfo['location'] = null;
     }
 
     /**
@@ -123,8 +146,8 @@ class Googleplus extends AbstractAdapter
      */
     public function getCountry()
     {
-        if (!isset($this->userInfo['country'])) {
-            $this->parseLocation();
+        if (!array_key_exists('country', $this->userInfo)) {
+            $this->getLocation();
         }
 
         return $this->getInfoVar('country');
@@ -138,8 +161,8 @@ class Googleplus extends AbstractAdapter
      */
     public function getCity()
     {
-        if (!isset($this->userInfo['city'])) {
-            $this->parseLocation();
+        if (!array_key_exists('city', $this->userInfo)) {
+            $this->getLocation();
         }
 
         return $this->getInfoVar('city');

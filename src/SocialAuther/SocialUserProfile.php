@@ -34,6 +34,7 @@ class SocialUserProfile implements \Iterator
      */
     protected $fields = array(
         'id',
+        'name',
         'firstName',
         'secondName',
         'sex',
@@ -41,6 +42,7 @@ class SocialUserProfile implements \Iterator
         'page',
         'image',
         'phone',
+        'location',
         'country',
         'city',
         'birthDate',
@@ -62,8 +64,8 @@ class SocialUserProfile implements \Iterator
             $this->adapter = $adapter;
         } else {
             throw new Exception\InvalidArgumentException(
-                    'SocialUser only expects instance of the type' .
-                    'SocialAuther\Adapter\AdapterInterface.'
+                    'SocialUserProfile only expects instance of the ' .
+                    'SocialAuther\Adapter\AdapterInterface type.'
             );
         }
     }
@@ -71,7 +73,7 @@ class SocialUserProfile implements \Iterator
     /**
      * Magic method to getting user data fields as properties
      *
-     * @param string $name field name
+     * @param string $name Variable name
      * @throws \LogicException
      * @return mixed
      */
@@ -79,14 +81,13 @@ class SocialUserProfile implements \Iterator
     {
         if (in_array($name, $this->fields))
         {
-            if (isset($this->cache[$name]))
-            {
+            if (array_key_exists($name, $this->cache)) {
                 return $this->cache[$name];
             }
 
             return $this->cache[$name] = call_user_func(array($this->adapter, 'get'.ucfirst($name)));
         }
-        else if ($name === 'provider') {
+        elseif ($name === 'provider') {
             return $this->adapter->getPovider();
         }
 
@@ -110,7 +111,7 @@ class SocialUserProfile implements \Iterator
     {
         $field = current($this->fields);
 
-        if (isset($this->cache[$field])) {
+        if (array_key_exists($field, $this->cache)) {
             return $this->cache[$field];
         }
 
@@ -137,7 +138,7 @@ class SocialUserProfile implements \Iterator
         if (!$field)
             return false;
 
-        if (isset($this->cache[$field])) {
+        if (array_key_exists($field, $this->cache)) {
             return $this->cache[$field];
         }
 
@@ -151,7 +152,7 @@ class SocialUserProfile implements \Iterator
     public function valid()
     {
         $key = current($this->fields);
-        return ($key !== null && $key !== false);
+        return is_string($key);
     }
 
 }
