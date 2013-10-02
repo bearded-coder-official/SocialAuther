@@ -150,7 +150,7 @@ class Twitter extends AbstractAdapter
         $response = $this->get($url, $params, false);
         parse_str($response, $tokenInfo);
 
-        if (!is_array($tokenInfo) && count(array_diff(array('oauth_token', 'oauth_token_secret', 'screen_name'), $tokenInfo)) > 0)
+        if (!is_array($tokenInfo) || count(array_diff(array('oauth_token', 'oauth_token_secret', 'screen_name'), array_keys($tokenInfo))) > 0)
         {
             return false;
         }
