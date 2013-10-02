@@ -305,24 +305,46 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function login()
     {
-        if (isset($_GET['code'])) {
+        if ($this->isRedirected() && !$this->haveErrors()) {
             return $this->readUserProfile();
         }
-        else {
-	        $config = $this->prepareAuthParams();
+        elseif (!$this->haveErrors()) {
+            $config = $this->prepareAuthParams();
 
-	        if (isset($config['auth_url']) && isset($config['auth_params'])) {
-	            $login_url = $config['auth_url'] . '?' . urldecode(http_build_query($config['auth_params']));
-	            header('Location: '. $login_url);
-	            exit;
-	        }
-	        else {
-	            throw new Exception\InvalidArgumentException(
-	                'Invalid params on '.ucfirst($this->provider).'::prepareAuthParams()'
-	            );
-	        }
+            if (isset($config['auth_url']) && isset($config['auth_params'])) {
+                $login_url = $config['auth_url'] . '?' . urldecode(http_build_query($config['auth_params']));
+                header('Location: '. $login_url);
+                exit;
+            }
+            else {
+                throw new Exception\InvalidArgumentException(
+                    'Invalid params on '.ucfirst($this->provider).'::prepareAuthParams()'
+                );
+            }
         }
         return false;
+    }
+
+    /**
+     * Checking for redirect from the provider
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return boolean
+     */
+    public function isRedirected()
+    {
+        return isset($_GET['code']) || $this->haveErrors();
+    }
+
+    /**
+     * Checking for errors
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return boolean
+     */
+    public function haveErrors()
+    {
+        return isset($_GET['error']);
     }
 
     /**

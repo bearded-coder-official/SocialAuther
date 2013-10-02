@@ -68,4 +68,25 @@ class SocialAuther
         return $this->adapter->getUserProfile();
     }
 
+    /**
+     * Checking for redirect from the provider
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return boolean
+     */
+    public function isRedirected()
+    {
+        return $this->adapter->isRedirected();
+    }
+
+    /**
+     * Checking for errors
+     *
+     * @author Andrey Izman <cyborgcms@gmail.com>
+     * @return boolean
+     */
+    public function haveErrors()
+    {
+        return $this->adapter->haveErrors();
+    }
 }
