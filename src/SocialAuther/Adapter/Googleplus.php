@@ -81,8 +81,7 @@ class Googleplus extends AbstractAdapter
     {
         if (isset($this->response['image']) && isset($this->response['image']['url']))
         {
-            $image = explode('?', $this->response['image']['url']);
-            return (!empty($image[0])) ? $image[0] : null;
+            return (!empty($this->response['image']['url'])) ? $this->response['image']['url'] : null;
         }
 
         return null;
