@@ -88,7 +88,7 @@ class SocialUserProfile implements \Iterator
             return $this->cache[$name] = call_user_func(array($this->adapter, 'get'.ucfirst($name)));
         }
         elseif ($name === 'provider') {
-            return $this->adapter->getPovider();
+            return $this->adapter->getProvider();
         }
 
         throw new \LogicException("Property $name is not defined in " . __CLASS__);
