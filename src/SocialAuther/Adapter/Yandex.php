@@ -8,28 +8,26 @@ class Yandex extends AbstractAdapter
     {
         parent::__construct($config);
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'id',
+        $this->fieldsMap = array(
+            'id'         => 'id',
             'email'      => 'default_email',
-            'name'       => 'real_name',
-            'socialPage' => 'link',
-            'avatar'     => 'picture',
+            'page'       => 'link',
+            'image'      => 'picture',
             'sex'        => 'sex',
-            'birthday'   => 'birthday'
+            'name'       => 'display_name',
         );
 
         $this->provider = 'yandex';
     }
 
     /**
-     * Authenticate and return bool result of authentication
+     * Call to provider server, get access token, authenticate,
+     * parse user profile data and return result of all this.
      *
-     * @return bool
+     * @return boolean
      */
-    public function authenticate()
+    protected function readUserProfile()
     {
-        $result = false;
-
         if (isset($_GET['code'])) {
             $params = array(
                 'grant_type' => 'authorization_code',
@@ -49,13 +47,27 @@ class Yandex extends AbstractAdapter
                 $userInfo = $this->get('https://login.yandex.ru/info', $params);
 
                 if (isset($userInfo['id'])) {
-                    $this->userInfo = $userInfo;
-                    $result = true;
+                    $this->parseUserData($userInfo);
+
+                    if (isset($this->response['birthday'])) {
+                        $birthDate = explode('-', $this->response['birthday']);
+                        $this->userInfo['birthDay']   = isset($birthDate[2]) ? $birthDate[2] : null;
+                        $this->userInfo['birthMonth'] = isset($birthDate[1]) ? $birthDate[1] : null;
+                        $this->userInfo['birthYear']  = isset($birthDate[0]) ? $birthDate[0] : null;
+                    }
+
+                    if (isset($this->response['real_name'])) {
+                        $name = explode(' ', $this->response['real_name']);
+                        $this->userInfo['secondName'] = (isset($name[0]) && !empty($name[0])) ? $name[0] : null;
+                        $this->userInfo['firstName'] = (isset($name[1]) && !empty($name[1])) ? $name[1] : null;
+                    }
+
+                    return true;
                 }
             }
         }
 
-        return $result;
+        return false;
     }
 
     /**
@@ -63,7 +75,7 @@ class Yandex extends AbstractAdapter
      *
      * @return array
      */
-    public function prepareAuthParams()
+    protected function prepareAuthParams()
     {
         return array(
             'auth_url'    => 'https://oauth.yandex.ru/authorize',
