@@ -53,6 +53,13 @@ abstract class AbstractAdapter implements AdapterInterface
     protected $userInfo = null;
 
     /**
+     * Name of parameter which service returnes 
+     *
+     * @var string
+     */
+    protected $responseType = 'code';
+
+    /**
      * Constructor
      *
      * @param array $config
@@ -196,6 +203,16 @@ abstract class AbstractAdapter implements AdapterInterface
     public function getProvider()
     {
         return $this->provider;
+    }
+
+    /**
+     * Return name of parameter which service returns
+     *
+     * @return string
+     */
+    public function getResponseType()
+    {
+        return $this->responseType;
     }
 
     /**
