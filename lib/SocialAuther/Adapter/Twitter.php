@@ -109,7 +109,7 @@ class Twitter extends AbstractAdapter
 
         return array(
             'auth_url'    => 'https://api.twitter.com/oauth/authorize',
-            'auth_params' => array('oauth_token' => $requestTokens['oauth_token']),
+            'auth_params' => array('oauth_token' => isset($requestTokens['oauth_token'])?$requestTokens['oauth_token']:NULL),
         );
     }
 
