@@ -95,6 +95,9 @@ class Vk extends AbstractAdapter
                 );
 
                 $userInfo = $this->get('https://api.vk.com/method/users.get', $params);
+                if (isset($tokenInfo['email'])) {
+                    $userInfo['response'][0]['email'] = $tokenInfo['email'];
+                }
                 if (isset($userInfo['response'][0]['uid'])) {
                     $this->userInfo = $userInfo['response'][0];
                     $result = true;
@@ -116,7 +119,7 @@ class Vk extends AbstractAdapter
             'auth_url'    => 'http://oauth.vk.com/authorize',
             'auth_params' => array(
                 'client_id'     => $this->clientId,
-                'scope'         => 'notify',
+                'scope'         => 'notify,email',
                 'redirect_uri'  => $this->redirectUri,
                 'response_type' => 'code'
             )

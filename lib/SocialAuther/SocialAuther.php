@@ -48,6 +48,16 @@ class SocialAuther
     }
 
     /**
+     * Call method getResponseType() of adater class
+     *
+     * @return string
+     */
+    public function getResponseType()
+    {
+        return $this->adapter->getResponseType();
+    }
+
+    /**
      * Call method of this class or methods of adapter class
      *
      * @param $method
