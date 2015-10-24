@@ -13,7 +13,7 @@ class Yandex extends AbstractAdapter
             'email'      => 'default_email',
             'name'       => 'real_name',
             'socialPage' => 'link',
-            'avatar'     => 'picture',
+            'avatar'     => 'default_avatar_id',
             'sex'        => 'sex',
             'birthday'   => 'birthday'
         );
