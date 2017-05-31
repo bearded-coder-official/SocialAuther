@@ -4,21 +4,23 @@ namespace SocialAuther\Adapter;
 
 class Mailru extends AbstractAdapter
 {
-    public function __construct($config)
-    {
-        parent::__construct($config);
+    /**
+     * {@inheritDoc}
+     */
+    protected $provider = 'mailru';
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'uid',
-            'email'      => 'email',
-            'name'       => 'nick',
-            'socialPage' => 'link',
-            'avatar'     => 'pic_big',
-            'birthday'   => 'birthday'
-        );
-
-        $this->provider = 'mailru';
-    }
+    /**
+     * {@inheritDoc}
+     */
+    protected $fieldsMap = array(
+        // local property name => external property name
+        'socialId'   => 'uid',
+        'email'      => 'email',
+        'name'       => 'nick',
+        'socialPage' => 'link',
+        'avatar'     => 'pic_big',
+        'birthday'   => 'birthday',
+    );
 
     /**
      * Get user sex or null if it is not set
@@ -27,19 +29,16 @@ class Mailru extends AbstractAdapter
      */
     public function getSex()
     {
-        $result = null;
-
         if (isset($this->userInfo['sex'])) {
-            $result = $this->userInfo['sex'] == 1 ? 'female' : 'male';
+            // gender is specified
+            return $this->userInfo['sex'] == 1 ? 'female' : 'male';
         }
 
-        return $result;
+        return null;
     }
 
     /**
-     * Authenticate and return bool result of authentication
-     *
-     * @return bool
+     * {@inheritDoc}
      */
     public function authenticate()
     {
@@ -54,21 +53,20 @@ class Mailru extends AbstractAdapter
                 'redirect_uri'  => $this->redirectUri
             );
 
-            $tokenInfo = $this->post('https://connect.mail.ru/oauth/token', $params);
-
-            if (isset($tokenInfo['access_token'])) {
-                $sign = md5("app_id={$this->clientId}method=users.getInfosecure=1session_key={$tokenInfo['access_token']}{$this->clientSecret}");
-
+            // Perform auth
+            $authInfo = $this->post('https://connect.mail.ru/oauth/token', $params);
+            if (isset($authInfo['access_token'])) {
+                // Auth OK, can fetch additional info
                 $params = array(
                     'method'       => 'users.getInfo',
                     'secure'       => '1',
                     'app_id'       => $this->clientId,
-                    'session_key'  => $tokenInfo['access_token'],
-                    'sig'          => $sign
+                    'session_key'  => $authInfo['access_token'],
+                    'sig'          => md5("app_id={$this->clientId}method=users.getInfosecure=1session_key={$authInfo['access_token']}{$this->clientSecret}"),
                 );
 
+                // Fetch additional info
                 $userInfo = $this->get('http://www.appsmail.ru/platform/api', $params);
-
                 if (isset($userInfo[0]['uid'])) {
                     $this->userInfo = array_shift($userInfo);
                     $result = true;
@@ -80,11 +78,9 @@ class Mailru extends AbstractAdapter
     }
 
     /**
-     * Prepare params for authentication url
-     *
-     * @return array
+     * {@inheritDoc}
      */
-    public function prepareAuthParams()
+    public function getAuthUrlComponents()
     {
         return array(
             'auth_url'    => 'https://connect.mail.ru/oauth/authorize',

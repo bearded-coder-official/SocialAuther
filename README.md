@@ -7,6 +7,7 @@
 - [Yandex](http://yandex.ru/)
 - [Google](http://google.com/)
 - [Facebook](http://facebook.com/)
+- [Twitter](http://twitter.com/)
 
 **Заметка:** _в данном примере настройка осуществляется для **локального сервера**_
 
@@ -368,6 +369,67 @@
         }
     }
 
+### Аутентификация через Twitter ###
+
+**Внимание!** _Для корректной работы аутентификации через Twitter на сервере должны быть выставлены настройки времени и даты, близкие к реальным. Погрешность в несколько минут допустима, но при больших отклонениях проблемы могут возникнуть уже на этапе формирования URL для аутентификации_
+
+- **Шаг 1.** Создание [нового приложения](https://apps.twitter.com/app/new):
+	- Name: "SocialAuther Test"
+	- Description: "SocialAuther Test Description"
+	- Website: "http://localhost"
+	- Callback URL: "http://localhost"
+- **Шаг 2.** Конфигурация параметров `client_id`, `client_secret` и `redirect_uri`:
+	- `client_id` - API key. Пример: `ef054ab66c0538b39e0a865cf`
+	- `client_secret` - API secret. Пример: `6d6c0538b39e0a86cf219ba88d386b114b9c6abef7eab4e8e4`
+	- `redirect_uri` - Callback URL. Пример: `http://localhost/auth?provider=twitter`
+- **Шаг 3.** Использование **SocialAuther**.
+
+Применение **SocialAuther**:
+
+	<?php
+	
+	// конфигурация настроек адаптера
+    $twiAdapterConfig = array(
+        'client_id'     => 'ef054ab66c0538b39e0a865cf',
+        'client_secret' => '6d6c0538b39e0a86cf219ba88d386b114b9c6abef7eab4e8e4',
+        'redirect_uri'  => 'http://localhost/auth?provider=twitter'
+    );
+
+	// создание адаптера и передача настроек
+	$twiAdapter = new SocialAuther\Adapter\Twitter($twiAdapterConfig);
+
+	// передача адаптера в SocialAuther
+	$auther = new SocialAuther\SocialAuther($twiAdapter);
+
+	// аутентификация и вывод данных пользователя или вывод ссылки для аутентификации
+	if (!isset($_GET[$auther->getResponseType()]) {
+		echo '<p><a href="' . $auther->getAuthUrl() . '">Аутентификация через Twitter</a></p>';
+	} else {
+		if ($auther->authenticate()) {
+			if (!is_null($auther->getSocialId()))
+				echo "Социальный ID пользователя: " . $auther->getSocialId() . '<br />';
+			
+			if (!is_null($auther->getName()))
+				echo "Имя пользователя: " . $auther->getName() . '<br />';
+			
+			if (!is_null($auther->getEmail()))
+				echo "Email пользователя: " . $auther->getEmail() . '<br />';
+			
+			if (!is_null($auther->getSocialPage()))
+				echo "Ссылка на профиль пользователя: " . $auther->getSocialPage() . '<br />';
+
+			if (!is_null($auther->getSex()))
+				echo "Пол пользователя: " . $auther->getSex() . '<br />';
+
+			if (!is_null($auther->getBirthday()))
+				echo "День Рождения: " . $auther->getBirthday() . '<br />';
+
+			// аватар пользователя 
+			if (!is_null($auther->getAvatar()))
+				echo '<img src="' . $auther->getAvatar() . '" />'; echo "<br />";
+		}
+	}
+
 ## Использование SocialAuther с несколькими социальными сетями и сервисами ##
 
     <?php
@@ -403,24 +465,32 @@
             'client_id'     => '346158195993388',
             'client_secret' => '2de1ab376d1c17cd47250920c05ab386',
             'redirect_uri'  => 'http://localhost/auth?provider=facebook'
-        )
+        ),
+        'twitter' => array(
+            'client_id'     => 'ef054ab66c0538b39e0a865cf',
+            'client_secret' => '6d6c0538b39e0a86cf219ba88d386b114b9c6abef7eab4e8e4',
+            'redirect_uri'  => 'http://localhost/auth?provider=twitter'
+        ),        
     );
 
     // создание адаптеров
     $adapters = array();
+    $responses = array();
     foreach ($adapterConfigs as $adapter => $settings) {
         $class = 'SocialAuther\Adapter\\' . ucfirst($adapter);
         $adapters[$adapter] = new $class($settings);
+        $responses[$adapter] = $adapters[$adapter]->getResponseType();
     }
 
-    if (!isset($_GET['code'])) {
+    if (    !isset($_GET['provider'])
+    	||  !array_key_exists($_GET['provider'], $adapters) 
+    	||  !isset($_GET[$responses[$_GET['provider']]])
+    ) {    
         foreach ($adapters as $title => $adapter) {
             echo '<p><a href="' . $adapter->getAuthUrl() . '">Аутентификация через ' . ucfirst($title) . '</a></p>';
         }
     } else {
-        if (isset($_GET['provider']) && array_key_exists($_GET['provider'], $adapters)) {
-            $auther = new SocialAuther\SocialAuther($adapters[$_GET['provider']]);
-        }
+        $auther = new SocialAuther\SocialAuther($adapters[$_GET['provider']]);        
 
         if ($auther->authenticate()) {
             if (!is_null($auther->getSocialId()))

@@ -8,6 +8,8 @@
 
 namespace SocialAuther\Adapter;
 
+use SocialAuther\Exception\InvalidArgumentException;
+
 abstract class AbstractAdapter implements AdapterInterface
 {
     /**
@@ -43,7 +45,7 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @var array
      */
-    protected $socialFieldsMap = array();
+    protected $fieldsMap = array();
 
     /**
      * Storage for user info
@@ -53,28 +55,65 @@ abstract class AbstractAdapter implements AdapterInterface
     protected $userInfo = null;
 
     /**
+     * Name of parameter which service returnes
+     *
+     * @var string
+     */
+    protected $responseType = 'code';
+
+    /**
+     * Accepted and required fields in initial config
+     *
+     * @var array
+     */
+    protected $fieldsInConfig = array(
+        'client_id',
+        'client_secret',
+        'redirect_uri',
+    );
+
+    /**
      * Constructor
      *
      * @param array $config
-     * @throws Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    public function __construct($config)
+    public function __construct(array $config)
     {
-        if (!is_array($config))
-            throw new Exception\InvalidArgumentException(
-                __METHOD__ . ' expects an array with keys: `client_id`, `client_secret`, `redirect_uri`'
-            );
-
-        foreach (array('client_id', 'client_secret', 'redirect_uri') as $param) {
-            if (!array_key_exists($param, $config)) {
-                throw new Exception\InvalidArgumentException(
-                    __METHOD__ . ' expects an array with key: `' . $param . '`'
-                );
-            } else {
+        if ($this->verifyConfig($config)) {
+            foreach ($config as $param) {
                 $property = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $param))));
                 $this->$property = $config[$param];
             }
         }
+    }
+
+    /**
+     * Check whether configuration is valid
+     *
+     * @param array $config
+     * @return bool
+     */
+    public function verifyConfig(array $config)
+    {
+        // Check for mandatory params presence
+        foreach ($this->fieldsInConfig as $param) {
+            if (!array_key_exists($param, $config)) {
+                // Mandatory param is absent
+                throw new InvalidArgumentException("Expects an array with key: '$param'");
+            }
+        }
+
+        // Check for extra params provided
+        foreach (array_keys($config) as $param) {
+            if (!array_key_exists($param, $this->fieldsInConfig)) {
+                // Extra params
+                throw new InvalidArgumentException("Unrecognized key: '$param'");
+            }
+        }
+
+        // All OK
+        return true;
     }
 
     /**
@@ -86,8 +125,8 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $result = null;
 
-        if (isset($this->userInfo[$this->socialFieldsMap['socialId']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['socialId']];
+        if (isset($this->userInfo[$this->fieldsMap['socialId']])) {
+            $result = $this->userInfo[$this->fieldsMap['socialId']];
         }
 
         return $result;
@@ -102,8 +141,8 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $result = null;
 
-        if (isset($this->userInfo[$this->socialFieldsMap['email']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['email']];
+        if (isset($this->userInfo[$this->fieldsMap['email']])) {
+            $result = $this->userInfo[$this->fieldsMap['email']];
         }
 
         return $result;
@@ -118,8 +157,8 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $result = null;
 
-        if (isset($this->userInfo[$this->socialFieldsMap['name']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['name']];
+        if (isset($this->userInfo[$this->fieldsMap['name']])) {
+            $result = $this->userInfo[$this->fieldsMap['name']];
         }
 
         return $result;
@@ -133,8 +172,8 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $result = null;
 
-        if (isset($this->userInfo[$this->socialFieldsMap['socialPage']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['socialPage']];
+        if (isset($this->userInfo[$this->fieldsMap['socialPage']])) {
+            $result = $this->userInfo[$this->fieldsMap['socialPage']];
         }
 
         return $result;
@@ -149,8 +188,8 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $result = null;
 
-        if (isset($this->userInfo[$this->socialFieldsMap['avatar']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['avatar']];
+        if (isset($this->userInfo[$this->fieldsMap['avatar']])) {
+            $result = $this->userInfo[$this->fieldsMap['avatar']];
         }
 
         return $result;
@@ -165,8 +204,8 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $result = null;
 
-        if (isset($this->userInfo[$this->socialFieldsMap['sex']])) {
-            $result = $this->userInfo[$this->socialFieldsMap['sex']];
+        if (isset($this->userInfo[$this->fieldsMap['sex']])) {
+            $result = $this->userInfo[$this->fieldsMap['sex']];
         }
 
         return $result;
@@ -181,8 +220,8 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $result = null;
 
-        if (isset($this->userInfo[$this->socialFieldsMap['birthday']])) {
-            $result = date('d.m.Y', strtotime($this->userInfo[$this->socialFieldsMap['birthday']]));
+        if (isset($this->userInfo[$this->fieldsMap['birthday']])) {
+            $result = date('d.m.Y', strtotime($this->userInfo[$this->fieldsMap['birthday']]));
         }
 
         return $result;
@@ -199,15 +238,32 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
+     * Return name of parameter which service returns
+     *
+     * @return string
+     */
+    public function getResponseType()
+    {
+        return $this->responseType;
+    }
+
+    /**
+     * Get all components required to build authentication url
+     *
+     * @return array
+     */
+    abstract public function getAuthUrlComponents();
+
+    /**
      * Get authentication url
      *
      * @return string
      */
     public function getAuthUrl()
     {
-        $config = $this->prepareAuthParams();
+        $config = $this->getAuthUrlComponents();
 
-        return $result = $config['auth_url'] . '?' . urldecode(http_build_query($config['auth_params']));
+        return $config['auth_url'] . '?' . urldecode(http_build_query($config['auth_params']));
     }
 
     /**

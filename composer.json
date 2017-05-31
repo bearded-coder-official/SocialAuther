@@ -1,0 +1,34 @@
+{
+  "name": "sunsingerus/SocialAuther",
+  "description": "Authentication via Social Networks",
+  "minimum-stability": "stable",
+  "version": "0.1",
+  "license": "GPL",
+  "homepage": "https://github.com/sunsingerus/SocialAuther",
+  "type": "project",
+  "keywords": ["auth"],
+
+  "authors": [
+    {
+      "name": "Stanislav Protasevich",
+      "email": "stanislav.protasevich@stanislasgroup.com"
+    },
+    {
+      "name": "Vladlen Grachev (https://github.com/gwer)"
+    },
+    {
+      "name": "Sun Singerus",
+      "email": "sunsingerus@gmail.com"
+    }
+  ],
+
+  "autoload": {
+    "psr-4": {
+      "SocialAuther\\": "src"
+    }
+  },
+
+  "require": {
+    "php": ">=5.6.0"
+  }
+}

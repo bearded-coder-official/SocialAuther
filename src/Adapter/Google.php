@@ -4,21 +4,23 @@ namespace SocialAuther\Adapter;
 
 class Google extends AbstractAdapter
 {
-    public function __construct($config)
-    {
-        parent::__construct($config);
+    /**
+     * {@inheritDoc}
+     */
+    protected $provider = 'google';
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'id',
-            'email'      => 'email',
-            'name'       => 'name',
-            'socialPage' => 'link',
-            'avatar'     => 'picture',
-            'sex'        => 'gender'
-        );
-
-        $this->provider = 'google';
-    }
+    /**
+     * {@inheritDoc}
+     */
+    protected $fieldsMap = array(
+        // local property name => external property name
+        'socialId'   => 'id',
+        'email'      => 'email',
+        'name'       => 'name',
+        'socialPage' => 'link',
+        'sex'        => 'gender',
+        'avatar'     => 'picture',
+    );
 
     /**
      * Get user birthday or null if it is not set
@@ -27,19 +29,16 @@ class Google extends AbstractAdapter
      */
     public function getBirthday()
     {
-        if (isset($this->_userInfo['birthday'])) {
-            $this->_userInfo['birthday'] = str_replace('0000', date('Y'), $this->_userInfo['birthday']);
-            $result = date('d.m.Y', strtotime($this->_userInfo['birthday']));
-        } else {
-            $result = null;
+        if (isset($this->userInfo['birthday'])) {
+            $this->userInfo['birthday'] = str_replace('0000', date('Y'), $this->userInfo['birthday']);
+            return date('d.m.Y', strtotime($this->userInfo['birthday']));
         }
-        return $result;
+
+        return null;
     }
 
     /**
-     * Authenticate and return bool result of authentication
-     *
-     * @return bool
+     * {@inheritDoc}
      */
     public function authenticate()
     {
@@ -54,13 +53,15 @@ class Google extends AbstractAdapter
                 'code'          => $_GET['code']
             );
 
-            $tokenInfo = $this->post('https://accounts.google.com/o/oauth2/token', $params);
+            // Perform auth
+            $authInfo = $this->post('https://accounts.google.com/o/oauth2/token', $params);
+            if (isset($authInfo['access_token'])) {
+                // Auth OK, can fetch additional info
+                $params['access_token'] = $authInfo['access_token'];
 
-            if (isset($tokenInfo['access_token'])) {
-                $params['access_token'] = $tokenInfo['access_token'];
-
+                // Fetch additional info
                 $userInfo = $this->get('https://www.googleapis.com/oauth2/v1/userinfo', $params);
-                if (isset($userInfo[$this->socialFieldsMap['socialId']])) {
+                if (isset($userInfo[$this->fieldsMap['socialId']])) {
                     $this->userInfo = $userInfo;
                     $result = true;
                 }
@@ -71,11 +72,9 @@ class Google extends AbstractAdapter
     }
 
     /**
-     * Prepare params for authentication url
-     *
-     * @return array
+     * {@inheritDoc}
      */
-    public function prepareAuthParams()
+    public function getAuthUrlComponents()
     {
         return array(
             'auth_url'    => 'https://accounts.google.com/o/oauth2/auth',

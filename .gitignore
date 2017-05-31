@@ -1,0 +1,16 @@
+# phpstorm project files
+.idea/*
+
+# windows thumbnail cache
+Thumbs.db
+
+# Mac DS_Store Files
+.DS_Store
+
+# composer
+/vendor
+composer.phar
+
+# version info file
+version.json
+

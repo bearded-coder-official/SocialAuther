@@ -9,11 +9,12 @@
 namespace SocialAuther;
 
 use SocialAuther\Adapter\AdapterInterface;
+use SocialAuther\Exception\InvalidArgumentException;
 
 class SocialAuther
 {
     /**
-     * Adapter manager
+     * Instance of Adapter
      *
      * @var AdapterInterface
      */
@@ -23,32 +24,14 @@ class SocialAuther
      * Constructor.
      *
      * @param AdapterInterface $adapter
-     * @throws Exception\InvalidArgumentException
      */
-    public function __construct($adapter)
+    public function __construct(AdapterInterface $adapter)
     {
-        if ($adapter instanceof AdapterInterface) {
-            $this->adapter = $adapter;
-        } else {
-            throw new Exception\InvalidArgumentException(
-                'SocialAuther only expects instance of the type' .
-                'SocialAuther\Adapter\AdapterInterface.'
-            );
-        }
+        $this->adapter = $adapter;
     }
 
     /**
-     * Call method authenticate() of adater class
-     *
-     * @return bool
-     */
-    public function authenticate()
-    {
-        return $this->adapter->authenticate();
-    }
-
-    /**
-     * Call method of this class or methods of adapter class
+     * Call either local or adapter's method
      *
      * @param $method
      * @param $params
@@ -63,5 +46,7 @@ class SocialAuther
         if (method_exists($this->adapter, $method)) {
             return $this->adapter->$method();
         }
+
+        throw new InvalidArgumentException("Unknown method " . __CLASS__ . "->$method()");
     }
 }

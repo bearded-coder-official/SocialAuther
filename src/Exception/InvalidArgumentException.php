@@ -6,7 +6,8 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace SocialAuther\Adapter\Exception;
+namespace SocialAuther\Exception;
 
-interface ExceptionInterface
-{}
+class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface
+{
+}

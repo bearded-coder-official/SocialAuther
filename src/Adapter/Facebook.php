@@ -4,21 +4,23 @@ namespace SocialAuther\Adapter;
 
 class Facebook extends AbstractAdapter
 {
-    public function __construct($config)
-    {
-        parent::__construct($config);
+    /**
+     * {@inheritDoc}
+     */
+    protected $provider = 'facebook';
 
-        $this->socialFieldsMap = array(
-            'socialId'   => 'id',
-            'email'      => 'email',
-            'name'       => 'name',
-            'socialPage' => 'link',
-            'sex'        => 'gender',
-            'birthday'   => 'birthday'
-        );
-
-        $this->provider = 'facebook';
-    }
+    /**
+     * {@inheritDoc}
+     */
+    protected $fieldsMap = array(
+        // local property name => external property name
+        'socialId'   => 'id',
+        'email'      => 'email',
+        'name'       => 'name',
+        'socialPage' => 'link',
+        'sex'        => 'gender',
+        'birthday'   => 'birthday'
+    );
 
     /**
      * Get url of user's avatar or null if it is not set
@@ -27,18 +29,15 @@ class Facebook extends AbstractAdapter
      */
     public function getAvatar()
     {
-        $result = null;
         if (isset($this->userInfo['username'])) {
-            $result = 'http://graph.facebook.com/' . $this->userInfo['username'] . '/picture?type=large';
+            return "http://graph.facebook.com/{$this->userInfo['username']}/picture?type=large";
         }
 
-        return $result;
+        return null;
     }
 
     /**
-     * Authenticate and return bool result of authentication
-     *
-     * @return bool
+     * {@inheritDoc}
      */
     public function authenticate()
     {
@@ -52,12 +51,16 @@ class Facebook extends AbstractAdapter
                 'code'          => $_GET['code']
             );
 
-            parse_str($this->get('https://graph.facebook.com/oauth/access_token', $params, false), $tokenInfo);
+            // Perform auth
+            $authInfo = $this->post('https://graph.facebook.com/oauth/access_token', $params);
+            if (isset($authInfo['access_token'])) {
+                // Auth OK, can fetch additional info
+                $params = array(
+                    'access_token' => $authInfo['access_token']
+                );
 
-            if (count($tokenInfo) > 0 && isset($tokenInfo['access_token'])) {
-                $params = array('access_token' => $tokenInfo['access_token']);
+                // Fetch additional info
                 $userInfo = $this->get('https://graph.facebook.com/me', $params);
-
                 if (isset($userInfo['id'])) {
                     $this->userInfo = $userInfo;
                     $result = true;
@@ -69,11 +72,9 @@ class Facebook extends AbstractAdapter
     }
 
     /**
-     * Prepare params for authentication url
-     *
-     * @return array
+     * {@inheritDoc}
      */
-    public function prepareAuthParams()
+    public function getAuthUrlComponents()
     {
         return array(
             'auth_url'    => 'https://www.facebook.com/dialog/oauth',
