@@ -1,13 +1,22 @@
 <?php
 
+/**
+ * SocialAuther (http://socialauther.stanislasgroup.com/)
+ *
+ * @author: Stanislav Protasevich
+ * @author: sunsingerus (https://github.com/sunsingerus)
+ *
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
 namespace SocialAuther\Adapter;
 
-class Vkontakte extends AbstractAdapter
+class Vkontakte extends AdapterBase
 {
     /**
      * {@inheritDoc}
      */
-    protected $provider = 'vkontakte';
+    protected $provider = self::PROVIDER_VKONTAKTE;
 
     /**
      * {@inheritDoc}

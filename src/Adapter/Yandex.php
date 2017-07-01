@@ -1,13 +1,22 @@
 <?php
 
+/**
+ * SocialAuther (http://socialauther.stanislasgroup.com/)
+ *
+ * @author: Stanislav Protasevich
+ * @author: sunsingerus (https://github.com/sunsingerus)
+ *
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
 namespace SocialAuther\Adapter;
 
-class Yandex extends AbstractAdapter
+class Yandex extends AdapterBase
 {
     /**
      * {@inheritDoc}
      */
-    protected $provider = 'yandex';
+    protected $provider = self::PROVIDER_YANDEX;
 
     /**
      * {@inheritDoc}

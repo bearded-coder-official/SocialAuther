@@ -2,15 +2,16 @@
 
 /**
  * @author: Vladlen Grachev (https://github.com/gwer)
+ * @author: sunsingerus (https://github.com/sunsingerus)
  */
 namespace SocialAuther\Adapter;
 
-class Twitter extends AbstractAdapter
+class Twitter extends AdapterBase
 {
     /**
      * {@inheritDoc}
      */
-    protected $provider = 'twitter';
+    protected $provider = self::PROVIDER_TWITTER;
 
     /**
      * {@inheritDoc}

@@ -1,8 +1,11 @@
 <?php
+
 /**
  * SocialAuther (http://socialauther.stanislasgroup.com/)
  *
  * @author: Stanislav Protasevich
+ * @author: sunsingerus (https://github.com/sunsingerus)
+ *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
@@ -16,4 +19,11 @@ interface AdapterInterface
      * @return bool
      */
     public function authenticate();
+
+    /**
+     * Get authentication url
+     *
+     * @return string
+     */
+    public function getAuthenticationUrl();
 }

@@ -1,8 +1,17 @@
 <?php
 
+/**
+ * SocialAuther (http://socialauther.stanislasgroup.com/)
+ *
+ * @author: Stanislav Protasevich
+ * @author: sunsingerus (https://github.com/sunsingerus)
+ *
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
 namespace SocialAuther\Adapter;
 
-class Odnoklassniki extends AbstractAdapter
+class Odnoklassniki extends AdapterBase
 {
     /**
      * Social Public Key
@@ -14,7 +23,7 @@ class Odnoklassniki extends AbstractAdapter
     /**
      * {@inheritDoc}
      */
-    protected $provider = 'odnoklassniki';
+    protected $provider = self::PROVIDER_ODNOKLASSNIKI;
 
     /**
      * {@inheritDoc}

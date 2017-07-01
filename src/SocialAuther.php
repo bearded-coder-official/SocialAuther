@@ -1,8 +1,11 @@
 <?php
+
 /**
  * SocialAuther (http://socialauther.stanislasgroup.com/)
  *
  * @author: Stanislav Protasevich
+ * @author: sunsingerus (https://github.com/sunsingerus)
+ *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 

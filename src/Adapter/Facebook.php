@@ -1,13 +1,22 @@
 <?php
 
+/**
+ * SocialAuther (http://socialauther.stanislasgroup.com/)
+ *
+ * @author: Stanislav Protasevich
+ * @author: sunsingerus (https://github.com/sunsingerus)
+ *
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
 namespace SocialAuther\Adapter;
 
-class Facebook extends AbstractAdapter
+class Facebook extends AdapterBase
 {
     /**
      * {@inheritDoc}
      */
-    protected $provider = 'facebook';
+    protected $provider = self::PROVIDER_FACEBOOK;
 
     /**
      * {@inheritDoc}

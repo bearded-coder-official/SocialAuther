@@ -1,8 +1,11 @@
 <?php
+
 /**
  * SocialAuther (http://socialauther.stanislasgroup.com/)
  *
  * @author: Stanislav Protasevich
+ * @author: sunsingerus (https://github.com/sunsingerus)
+ *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
@@ -10,8 +13,16 @@ namespace SocialAuther\Adapter;
 
 use SocialAuther\Exception\InvalidArgumentException;
 
-abstract class AbstractAdapter implements AdapterInterface
+abstract class AdapterBase implements AdapterInterface
 {
+    const PROVIDER_FACEBOOK = 'fb';
+    const PROVIDER_GOOGLE = 'google';
+    const PROVIDER_MAILRU = 'mailru';
+    const PROVIDER_ODNOKLASSNIKI = 'ok';
+    const PROVIDER_TWITTER = 'twitter';
+    const PROVIDER_VKONTAKTE = 'vk';
+    const PROVIDER_YANDEX = 'yandex';
+
     /**
      * Social Client ID
      *
@@ -101,11 +112,11 @@ abstract class AbstractAdapter implements AdapterInterface
         $this->verifyConfig($config);
 
         // assign values from config to local properties
-        foreach ($config as $param) {
+        foreach ($config as $name => $value) {
             // build property name
-            $property = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $param))));
+            $property = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $name))));
             // assign property with config's value
-            $this->$property = $config[$param];
+            $this->$property = $config[$name];
         }
     }
 
@@ -122,14 +133,14 @@ abstract class AbstractAdapter implements AdapterInterface
         // check for mandatory params
         foreach ($this->knownConfigParams as $param) {
             if (!array_key_exists($param, $config)) {
-                // no mandatory mandatory param provided
+                // no mandatory param provided
                 throw new InvalidArgumentException("Expects an array with key: '$param'");
             }
         }
 
         // check for unknown params
         foreach (array_keys($config) as $param) {
-            if (!array_key_exists($param, $this->knownConfigParams)) {
+            if (!in_array($param, $this->knownConfigParams)) {
                 // unknown param provided
                 throw new InvalidArgumentException("Unrecognized key: '$param'");
             }
@@ -260,11 +271,9 @@ abstract class AbstractAdapter implements AdapterInterface
     abstract public function getAuthUrlComponents();
 
     /**
-     * Get authentication url
-     *
-     * @return string
+     * {@inheritDoc}
      */
-    public function getAuthUrl()
+    public function getAuthenticationUrl()
     {
         $config = $this->getAuthUrlComponents();
 

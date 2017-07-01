@@ -1,13 +1,22 @@
 <?php
 
+/**
+ * SocialAuther (http://socialauther.stanislasgroup.com/)
+ *
+ * @author: Stanislav Protasevich
+ * @author: sunsingerus (https://github.com/sunsingerus)
+ *
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
 namespace SocialAuther\Adapter;
 
-class Mailru extends AbstractAdapter
+class Mailru extends AdapterBase
 {
     /**
      * {@inheritDoc}
      */
-    protected $provider = 'mailru';
+    protected $provider = self::PROVIDER_MAILRU;
 
     /**
      * {@inheritDoc}
