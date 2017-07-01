@@ -48,7 +48,7 @@ class Facebook extends AbstractAdapter
                 'client_id'     => $this->clientId,
                 'redirect_uri'  => $this->redirectUri,
                 'client_secret' => $this->clientSecret,
-                'code'          => $_GET['code']
+                'code'          => $_GET['code'],
             );
 
             // Perform auth

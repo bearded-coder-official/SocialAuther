@@ -61,7 +61,7 @@ class Google extends AbstractAdapter
 
                 // Fetch additional info
                 $userInfo = $this->get('https://www.googleapis.com/oauth2/v1/userinfo', $params);
-                if (isset($userInfo[$this->fieldsMap['socialId']])) {
+                if (isset($userInfo[$this->fieldsMap[static::ATTRIBUTE_ID]])) {
                     $this->userInfo = $userInfo;
                     $result = true;
                 }
