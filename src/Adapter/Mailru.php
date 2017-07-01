@@ -14,12 +14,12 @@ class Mailru extends AbstractAdapter
      */
     protected $fieldsMap = array(
         // local property name => external property name
-        'socialId'   => 'uid',
-        'email'      => 'email',
-        'name'       => 'nick',
-        'socialPage' => 'link',
-        'avatar'     => 'pic_big',
-        'birthday'   => 'birthday',
+        self::ATTRIBUTE_ID         => 'uid',
+        self::ATTRIBUTE_EMAIL      => 'email',
+        self::ATTRIBUTE_NAME       => 'nick',
+        self::ATTRIBUTE_PAGE_URL   => 'link',
+        self::ATTRIBUTE_AVATAR_URL => 'pic_big',
+        self::ATTRIBUTE_BIRTHDAY   => 'birthday',
     );
 
     /**

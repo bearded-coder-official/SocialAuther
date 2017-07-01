@@ -14,10 +14,10 @@ class Vkontakte extends AbstractAdapter
      */
     protected $fieldsMap = array(
         // local property name => external property name
-        'socialId' => 'uid',
-        'email'    => 'email',
-        'avatar'   => 'photo_big',
-        'birthday' => 'bdate',
+        self::ATTRIBUTE_ID         => 'uid',
+        self::ATTRIBUTE_EMAIL      => 'email',
+        self::ATTRIBUTE_AVATAR_URL => 'photo_big',
+        self::ATTRIBUTE_BIRTHDAY   => 'bdate',
     );
 
     /**
@@ -51,7 +51,7 @@ class Vkontakte extends AbstractAdapter
      *
      * @return string|null
      */
-    public function getSocialPage()
+    public function getPageUrl()
     {
         if (isset($this->userInfo['screen_name'])) {
             // screen name is available - can build URL

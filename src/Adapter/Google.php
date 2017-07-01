@@ -14,12 +14,12 @@ class Google extends AbstractAdapter
      */
     protected $fieldsMap = array(
         // local property name => external property name
-        'socialId'   => 'id',
-        'email'      => 'email',
-        'name'       => 'name',
-        'socialPage' => 'link',
-        'sex'        => 'gender',
-        'avatar'     => 'picture',
+        self::ATTRIBUTE_ID         => 'id',
+        self::ATTRIBUTE_EMAIL      => 'email',
+        self::ATTRIBUTE_NAME       => 'name',
+        self::ATTRIBUTE_PAGE_URL   => 'link',
+        self::ATTRIBUTE_SEX        => 'gender',
+        self::ATTRIBUTE_AVATAR_URL => 'picture',
     );
 
     /**

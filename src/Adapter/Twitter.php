@@ -22,11 +22,11 @@ class Twitter extends AbstractAdapter
      */
     protected $socialFieldsMap = array(
         // local property name => external property name
-        'socialId' => 'id',
-        'name'     => 'name',
-        'email'    => 'email',
-        'sex'      => 'sex',
-        'birthday' => 'bdate'
+        self::ATTRIBUTE_ID       => 'id',
+        self::ATTRIBUTE_NAME     => 'name',
+        self::ATTRIBUTE_EMAIL    => 'email',
+        self::ATTRIBUTE_SEX      => 'sex',
+        self::ATTRIBUTE_BIRTHDAY => 'bdate',
     );
 
     /**
@@ -34,7 +34,7 @@ class Twitter extends AbstractAdapter
      *
      * @return string|null
      */
-    public function getSocialPage()
+    public function getPageUrl()
     {
         if (isset($this->userInfo['screen_name'])) {
             return 'http://twitter.com/' . $this->userInfo['screen_name'];
@@ -48,7 +48,7 @@ class Twitter extends AbstractAdapter
      *
      * @return string|null
      */
-    public function getAvatar()
+    public function getAvatarUrl()
     {
         if (isset($this->userInfo['profile_image_url'])) {
             return implode('', explode('_normal', $this->userInfo['profile_image_url']));

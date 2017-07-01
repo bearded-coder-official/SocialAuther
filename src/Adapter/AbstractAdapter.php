@@ -40,13 +40,13 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     protected $provider = null;
 
-    const ATTRIBUTE_ID        = 'socialId';
-    const ATTRIBUTE_EMAIL     = 'email';
-    const ATTRIBUTE_NAME      = 'name';
-    const ATTRIBUTE_PAGE      = 'socialPage';
-    const ATTRIBUTE_AVATAR    = 'avatar';
-    const ATTRIBUTE_SEX       = 'sex';
-    const AATTRIBUTE_BIRTHDAY = 'birthday';
+    const ATTRIBUTE_ID         = 'socialId';
+    const ATTRIBUTE_EMAIL      = 'email';
+    const ATTRIBUTE_NAME       = 'name';
+    const ATTRIBUTE_PAGE_URL   = 'socialPage';
+    const ATTRIBUTE_AVATAR_URL = 'avatar';
+    const ATTRIBUTE_SEX        = 'sex';
+    const ATTRIBUTE_BIRTHDAY   = 'birthday';
 
 
     /**
@@ -54,7 +54,15 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @var array
      */
-    protected $fieldsMap = array();
+    protected $fieldsMap = array(
+        self::ATTRIBUTE_ID         => null,
+        self::ATTRIBUTE_EMAIL      => null,
+        self::ATTRIBUTE_NAME       => null,
+        self::ATTRIBUTE_PAGE_URL   => null,
+        self::ATTRIBUTE_AVATAR_URL => null,
+        self::ATTRIBUTE_SEX        => null,
+        self::ATTRIBUTE_BIRTHDAY   => null,
+    );
 
     /**
      * Storage for user info
@@ -154,7 +162,7 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @return string|null
      */
-    public function getSocialId()
+    public function getId()
     {
         return $this->getUserAttribute(static::ATTRIBUTE_ID);
     }
@@ -183,9 +191,9 @@ abstract class AbstractAdapter implements AdapterInterface
      * Get user social page url or null if it is not set
      * @return string|null
      */
-    public function getSocialPage()
+    public function getPageUrl()
     {
-        return $this->getUserAttribute(static::ATTRIBUTE_PAGE);
+        return $this->getUserAttribute(static::ATTRIBUTE_PAGE_URL);
     }
 
     /**
@@ -193,9 +201,9 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @return string|null
      */
-    public function getAvatar()
+    public function getAvatarUrl()
     {
-        return $this->getUserAttribute(static::ATTRIBUTE_AVATAR);
+        return $this->getUserAttribute(static::ATTRIBUTE_AVATAR_URL);
     }
 
     /**
@@ -215,7 +223,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthday()
     {
-        $result = $this->getUserAttribute(static::ATTRIBUTE_EMAIL);
+        $result = $this->getUserAttribute(static::ATTRIBUTE_BIRTHDAY);
 
         if (!empty($result)) {
             return date('d.m.Y', strtotime($result));

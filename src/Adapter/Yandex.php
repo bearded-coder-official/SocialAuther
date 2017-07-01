@@ -13,13 +13,13 @@ class Yandex extends AbstractAdapter
      * {@inheritDoc}
      */
     protected $fieldsMap = array(
-        'socialId'   => 'id',
-        'email'      => 'default_email',
-        'name'       => 'real_name',
-        'socialPage' => 'link',
-        'avatar'     => 'default_avatar_id',
-        'sex'        => 'sex',
-        'birthday'   => 'birthday'
+        self::ATTRIBUTE_ID         => 'id',
+        self::ATTRIBUTE_EMAIL      => 'default_email',
+        self::ATTRIBUTE_NAME       => 'real_name',
+        self::ATTRIBUTE_PAGE_URL   => 'link',
+        self::ATTRIBUTE_AVATAR_URL => 'default_avatar_id',
+        self::ATTRIBUTE_SEX        => 'sex',
+        self::ATTRIBUTE_BIRTHDAY   => 'birthday',
     );
 
     /**

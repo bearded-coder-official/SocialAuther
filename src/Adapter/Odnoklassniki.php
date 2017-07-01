@@ -21,12 +21,12 @@ class Odnoklassniki extends AbstractAdapter
      */
     protected $fieldsMap = array(
         // local property name => external property name
-        'socialId'   => 'uid',
-        'email'      => 'email',
-        'name'       => 'name',
-        'avatar'     => 'pic_2',
-        'sex'        => 'gender',
-        'birthday'   => 'birthday'
+        self::ATTRIBUTE_ID         => 'uid',
+        self::ATTRIBUTE_EMAIL      => 'email',
+        self::ATTRIBUTE_NAME       => 'name',
+        self::ATTRIBUTE_AVATAR_URL => 'pic_2',
+        self::ATTRIBUTE_SEX        => 'gender',
+        self::ATTRIBUTE_BIRTHDAY   => 'birthday',
     );
 
     /**
@@ -44,7 +44,7 @@ class Odnoklassniki extends AbstractAdapter
      *
      * @return string|null
      */
-    public function getSocialPage()
+    public function getPageUrl()
     {
         if (isset($this->userInfo['uid'])) {
             return 'http://www.odnoklassniki.ru/profile/' . $this->userInfo['uid'];

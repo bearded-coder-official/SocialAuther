@@ -14,12 +14,12 @@ class Facebook extends AbstractAdapter
      */
     protected $fieldsMap = array(
         // local property name => external property name
-        'socialId'   => 'id',
-        'email'      => 'email',
-        'name'       => 'name',
-        'socialPage' => 'link',
-        'sex'        => 'gender',
-        'birthday'   => 'birthday'
+        self::ATTRIBUTE_ID       => 'id',
+        self::ATTRIBUTE_EMAIL    => 'email',
+        self::ATTRIBUTE_NAME     => 'name',
+        self::ATTRIBUTE_PAGE_URL => 'link',
+        self::ATTRIBUTE_SEX      => 'gender',
+        self::ATTRIBUTE_BIRTHDAY => 'birthday',
     );
 
     /**
@@ -27,7 +27,7 @@ class Facebook extends AbstractAdapter
      *
      * @return string|null
      */
-    public function getAvatar()
+    public function getAvatarUrl()
     {
         if (isset($this->userInfo['username'])) {
             return "http://graph.facebook.com/{$this->userInfo['username']}/picture?type=large";
