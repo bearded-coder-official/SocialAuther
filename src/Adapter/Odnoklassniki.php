@@ -32,7 +32,7 @@ class Odnoklassniki extends AbstractAdapter
     /**
      * {@inheritDoc}
      */
-    protected $fieldsInConfig = array(
+    protected $knownConfigParams = array(
         'client_id',
         'client_secret',
         'redirect_uri',

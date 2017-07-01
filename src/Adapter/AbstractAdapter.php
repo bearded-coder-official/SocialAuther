@@ -40,6 +40,15 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     protected $provider = null;
 
+    const ATTRIBUTE_ID        = 'socialId';
+    const ATTRIBUTE_EMAIL     = 'email';
+    const ATTRIBUTE_NAME      = 'name';
+    const ATTRIBUTE_PAGE      = 'socialPage';
+    const ATTRIBUTE_AVATAR    = 'avatar';
+    const ATTRIBUTE_SEX       = 'sex';
+    const AATTRIBUTE_BIRTHDAY = 'birthday';
+
+
     /**
      * Social Fields Map for universal keys
      *
@@ -66,7 +75,7 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @var array
      */
-    protected $fieldsInConfig = array(
+    protected $knownConfigParams = array(
         'client_id',
         'client_secret',
         'redirect_uri',
@@ -80,11 +89,15 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function __construct(array $config)
     {
-        if ($this->verifyConfig($config)) {
-            foreach ($config as $param) {
-                $property = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $param))));
-                $this->$property = $config[$param];
-            }
+        // throws Exception if anything is not good
+        $this->verifyConfig($config);
+
+        // assign values from config to local properties
+        foreach ($config as $param) {
+            // build property name
+            $property = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $param))));
+            // assign property with config's value
+            $this->$property = $config[$param];
         }
     }
 
@@ -93,27 +106,47 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @param array $config
      * @return bool
+     *
+     * @throws InvalidArgumentException
      */
     public function verifyConfig(array $config)
     {
-        // Check for mandatory params presence
-        foreach ($this->fieldsInConfig as $param) {
+        // check for mandatory params
+        foreach ($this->knownConfigParams as $param) {
             if (!array_key_exists($param, $config)) {
-                // Mandatory param is absent
+                // no mandatory mandatory param provided
                 throw new InvalidArgumentException("Expects an array with key: '$param'");
             }
         }
 
-        // Check for extra params provided
+        // check for unknown params
         foreach (array_keys($config) as $param) {
-            if (!array_key_exists($param, $this->fieldsInConfig)) {
-                // Extra params
+            if (!array_key_exists($param, $this->knownConfigParams)) {
+                // unknown param provided
                 throw new InvalidArgumentException("Unrecognized key: '$param'");
             }
         }
 
-        // All OK
+        // all OK
         return true;
+    }
+
+    /**
+     * Get unified user attribute based on unified attribute name
+     *
+     * @param $attribute
+     * @return mixed|null
+     */
+    protected function getUserAttribute($attribute)
+    {
+        // do we have requested attribute?
+        if (isset($this->userInfo[$this->fieldsMap[$attribute]])) {
+            // yes, we have requested attribute
+            return $this->userInfo[$this->fieldsMap[$attribute]];
+        }
+
+        // we do not have requested attribute, just return something
+        return null;
     }
 
     /**
@@ -123,13 +156,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getSocialId()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->fieldsMap['socialId']])) {
-            $result = $this->userInfo[$this->fieldsMap['socialId']];
-        }
-
-        return $result;
+        return $this->getUserAttribute(static::ATTRIBUTE_ID);
     }
 
     /**
@@ -139,13 +166,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getEmail()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->fieldsMap['email']])) {
-            $result = $this->userInfo[$this->fieldsMap['email']];
-        }
-
-        return $result;
+        return $this->getUserAttribute(static::ATTRIBUTE_EMAIL);
     }
 
     /**
@@ -155,13 +176,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getName()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->fieldsMap['name']])) {
-            $result = $this->userInfo[$this->fieldsMap['name']];
-        }
-
-        return $result;
+        return $this->getUserAttribute(static::ATTRIBUTE_NAME);
     }
 
     /**
@@ -170,13 +185,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getSocialPage()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->fieldsMap['socialPage']])) {
-            $result = $this->userInfo[$this->fieldsMap['socialPage']];
-        }
-
-        return $result;
+        return $this->getUserAttribute(static::ATTRIBUTE_PAGE);
     }
 
     /**
@@ -186,13 +195,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getAvatar()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->fieldsMap['avatar']])) {
-            $result = $this->userInfo[$this->fieldsMap['avatar']];
-        }
-
-        return $result;
+        return $this->getUserAttribute(static::ATTRIBUTE_AVATAR);
     }
 
     /**
@@ -202,13 +205,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getSex()
     {
-        $result = null;
-
-        if (isset($this->userInfo[$this->fieldsMap['sex']])) {
-            $result = $this->userInfo[$this->fieldsMap['sex']];
-        }
-
-        return $result;
+        return $this->getUserAttribute(static::ATTRIBUTE_SEX);
     }
 
     /**
@@ -218,10 +215,10 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getBirthday()
     {
-        $result = null;
+        $result = $this->getUserAttribute(static::ATTRIBUTE_EMAIL);
 
-        if (isset($this->userInfo[$this->fieldsMap['birthday']])) {
-            $result = date('d.m.Y', strtotime($this->userInfo[$this->fieldsMap['birthday']]));
+        if (!empty($result)) {
+            return date('d.m.Y', strtotime($result));
         }
 
         return $result;
