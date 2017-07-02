@@ -48,36 +48,44 @@ class Facebook extends AdapterBase
     /**
      * {@inheritDoc}
      */
-    public function authenticate()
+    public function authenticate($params)
     {
-        $result = false;
-
-        if (isset($_GET['code'])) {
-            $params = array(
-                'client_id'     => $this->clientId,
-                'redirect_uri'  => $this->redirectUri,
-                'client_secret' => $this->clientSecret,
-                'code'          => $_GET['code'],
-            );
-
-            // Perform auth
-            $authInfo = $this->post('https://graph.facebook.com/oauth/access_token', $params);
-            if (isset($authInfo['access_token'])) {
-                // Auth OK, can fetch additional info
-                $params = array(
-                    'access_token' => $authInfo['access_token']
-                );
-
-                // Fetch additional info
-                $userInfo = $this->get('https://graph.facebook.com/me', $params);
-                if (isset($userInfo['id'])) {
-                    $this->userInfo = $userInfo;
-                    $result = true;
-                }
-            }
+        $params = $this->getAuthenticationParams($params);
+        if (empty($params)) {
+            // no required params provided
+            return false;
         }
 
-        return $result;
+        $params = array(
+            'client_id'     => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'redirect_uri'  => $this->redirectUri,
+            'code'          => $params['code'],
+        );
+
+        // Perform auth
+        $authInfo = $this->post('https://graph.facebook.com/oauth/access_token', $params);
+        if (!isset($authInfo['access_token'])) {
+            // something went wrong
+            return false;
+        }
+
+        // Auth OK, can fetch additional info
+        $params = array(
+            'access_token' => $authInfo['access_token']
+        );
+
+        // Fetch user info
+        $userInfo = $this->get('https://graph.facebook.com/me', $params);
+        if (!isset($userInfo[$this->fieldsMap[static::ATTRIBUTE_ID]])) {
+            // something went wrong
+            return false;
+        }
+
+        // user info received
+        $this->userInfo = $userInfo;
+
+        return true;
     }
 
     /**

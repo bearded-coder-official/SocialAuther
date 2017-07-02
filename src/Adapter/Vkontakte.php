@@ -88,41 +88,51 @@ class Vkontakte extends AdapterBase
     /**
      * {@inheritDoc}
      */
-    public function authenticate()
+    public function authenticate($params)
     {
-        $result = false;
-
-        if (isset($_GET['code'])) {
-            $params = array(
-                'client_id'     => $this->clientId,
-                'client_secret' => $this->clientSecret,
-                'code'          => $_GET['code'],
-                'redirect_uri'  => $this->redirectUri
-            );
-
-            // Perform auth
-            $authInfo = $this->get('https://oauth.vk.com/access_token', $params);
-            if (isset($authInfo['access_token'])) {
-                // Auth OK, can fetch additional info
-                $params = array(
-                    'uids'         => $authInfo['user_id'],
-                    'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo_big',
-                    'access_token' => $authInfo['access_token']
-                );
-
-                // Fetch additional info
-                $userInfo = $this->get('https://api.vk.com/method/users.get', $params);
-                if (isset($authInfo['email'])) {
-                        $userInfo['response'][0]['email'] = $authInfo['email'];
-                }
-                if (isset($userInfo['response'][0]['uid'])) {
-                    $this->userInfo = $userInfo['response'][0];
-                    $result = true;
-                }
-            }
+        $params = $this->getAuthenticationParams($params);
+        if (empty($params)) {
+            // no required params provided
+            return false;
         }
 
-        return $result;
+        $params = array(
+            'client_id'     => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'redirect_uri'  => $this->redirectUri,
+            'code'          => $params['code'],
+        );
+
+        // Perform auth
+        $authInfo = $this->get('https://oauth.vk.com/access_token', $params);
+        if (!isset($authInfo['access_token'])) {
+            // something went wrong
+            return false;
+        }
+
+        // Auth OK, can fetch additional info
+        $params = array(
+            'uids'         => $authInfo['user_id'],
+            'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo_big',
+            'access_token' => $authInfo['access_token']
+        );
+
+        // Fetch user info
+        $userInfo = $this->get('https://api.vk.com/method/users.get', $params);
+        if (!isset($userInfo['response'][0][$this->fieldsMap[static::ATTRIBUTE_ID]])) {
+            // something went wrong
+            return false;
+        }
+
+        // user info received
+        $this->userInfo = $userInfo['response'][0];
+
+        // append email received earlier in authInfo
+        if (isset($authInfo['email'])) {
+            $this->userInfo[$this->fieldsMap[static::ATTRIBUTE_EMAIL]] = $authInfo['email'];
+        }
+
+        return true;
     }
 
     /**

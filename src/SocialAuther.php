@@ -43,11 +43,11 @@ class SocialAuther
     public function __call($method, $params)
     {
         if (method_exists($this, $method)) {
-            return $this->$method($params);
+            return call_user_func_array([$this, $method], $params);
         }
 
         if (method_exists($this->adapter, $method)) {
-            return $this->adapter->$method();
+            return call_user_func_array([$this->adapter, $method], $params);
         }
 
         throw new InvalidArgumentException("Unknown method " . __CLASS__ . "->$method()");

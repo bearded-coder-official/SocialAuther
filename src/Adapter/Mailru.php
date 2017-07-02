@@ -49,41 +49,49 @@ class Mailru extends AdapterBase
     /**
      * {@inheritDoc}
      */
-    public function authenticate()
+    public function authenticate($params)
     {
-        $result = false;
-
-        if (isset($_GET['code'])) {
-            $params = array(
-                'client_id'     => $this->clientId,
-                'client_secret' => $this->clientSecret,
-                'grant_type'    => 'authorization_code',
-                'code'          => $_GET['code'],
-                'redirect_uri'  => $this->redirectUri
-            );
-
-            // Perform auth
-            $authInfo = $this->post('https://connect.mail.ru/oauth/token', $params);
-            if (isset($authInfo['access_token'])) {
-                // Auth OK, can fetch additional info
-                $params = array(
-                    'method'       => 'users.getInfo',
-                    'secure'       => '1',
-                    'app_id'       => $this->clientId,
-                    'session_key'  => $authInfo['access_token'],
-                    'sig'          => md5("app_id={$this->clientId}method=users.getInfosecure=1session_key={$authInfo['access_token']}{$this->clientSecret}"),
-                );
-
-                // Fetch additional info
-                $userInfo = $this->get('http://www.appsmail.ru/platform/api', $params);
-                if (isset($userInfo[0]['uid'])) {
-                    $this->userInfo = array_shift($userInfo);
-                    $result = true;
-                }
-            }
+        $params = $this->getAuthenticationParams($params);
+        if (empty($params)) {
+            // no required params provided
+            return false;
         }
 
-        return $result;
+        $params = array(
+            'client_id'     => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'redirect_uri'  => $this->redirectUri,
+            'code'          => $params['code'],
+            'grant_type'    => 'authorization_code',
+        );
+
+        // Perform auth
+        $authInfo = $this->post('https://connect.mail.ru/oauth/token', $params);
+        if (!isset($authInfo['access_token'])) {
+            // something went wrong
+            return false;
+        }
+
+        // Auth OK, can fetch additional info
+        $params = array(
+            'method'      => 'users.getInfo',
+            'secure'      => '1',
+            'app_id'      => $this->clientId,
+            'session_key' => $authInfo['access_token'],
+            'sig'         => md5("app_id={$this->clientId}method=users.getInfosecure=1session_key={$authInfo['access_token']}{$this->clientSecret}"),
+        );
+
+        // Fetch user info
+        $userInfo = $this->get('http://www.appsmail.ru/platform/api', $params);
+        if (!isset($userInfo[0][$this->fieldsMap[static::ATTRIBUTE_ID]])) {
+            // something went wrong
+            return false;
+        }
+
+        // user info received
+        $this->userInfo = array_shift($userInfo);
+
+        return true;
     }
 
     /**

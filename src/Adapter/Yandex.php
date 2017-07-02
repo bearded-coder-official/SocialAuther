@@ -34,37 +34,45 @@ class Yandex extends AdapterBase
     /**
      * {@inheritDoc}
      */
-    public function authenticate()
+    public function authenticate($params)
     {
-        $result = false;
-
-        if (isset($_GET['code'])) {
-            $params = array(
-                'grant_type'    => 'authorization_code',
-                'code'          => $_GET['code'],
-                'client_id'     => $this->clientId,
-                'client_secret' => $this->clientSecret
-            );
-
-            // Perform auth
-            $authInfo = $this->post('https://oauth.yandex.ru/token', $params);
-            if (isset($authInfo['access_token'])) {
-                // Auth OK, can fetch additional info
-                $params = array(
-                    'format'      => 'json',
-                    'oauth_token' => $authInfo['access_token']
-                );
-
-                // Fetch additional info
-                $userInfo = $this->get('https://login.yandex.ru/info', $params);
-                if (isset($userInfo['id'])) {
-                    $this->userInfo = $userInfo;
-                    $result = true;
-                }
-            }
+        $params = $this->getAuthenticationParams($params);
+        if (empty($params)) {
+            // no required params provided
+            return false;
         }
 
-        return $result;
+        $params = array(
+            'client_id'     => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'code'          => $params['code'],
+            'grant_type'    => 'authorization_code',
+        );
+
+        // Perform auth
+        $authInfo = $this->post('https://oauth.yandex.ru/token', $params);
+        if (!isset($authInfo['access_token'])) {
+            // something went wrong
+            return false;
+        }
+
+        // Auth OK, can fetch additional info
+        $params = array(
+            'format'      => 'json',
+            'oauth_token' => $authInfo['access_token']
+        );
+
+        // Fetch user info
+        $userInfo = $this->get('https://login.yandex.ru/info', $params);
+        if (!isset($userInfo[$this->fieldsMap[static::ATTRIBUTE_ID]])) {
+            // something went wrong
+            return false;
+        }
+
+        // user info received
+        $this->userInfo = $userInfo;
+
+        return true;
     }
 
     /**

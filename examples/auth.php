@@ -15,31 +15,64 @@ use SocialAuther\Adapter\AdapterBase;
 use SocialAuther\Adapter\AdapterFactory;
 use SocialAuther\SocialAuther;
 
-// Social Auth settings
-$config = array(
-    AdapterBase::PROVIDER_VKONTAKTE => array(
-        'client_id'     => '6097024',
-        'client_secret' => 'Fzo6IqM8fMczAXycXpFl',
-        'redirect_uri'  => 'http://localhost/examples/auth.php?provider=' . AdapterBase::PROVIDER_VKONTAKTE,
-    ),
-);
+class AuthExample
+{
+    // Social Auth settings
+    protected $config = array(
+        AdapterBase::PROVIDER_VKONTAKTE => array(
+            'client_id'     => '6097024',
+            'client_secret' => 'Fzo6IqM8fMczAXycXpFl',
+            'redirect_uri'  => 'http://localhost/examples/auth.php?provider=' . AdapterBase::PROVIDER_VKONTAKTE,
+        ),
+    );
 
-// build array of providers
-$providers = array();
-foreach ($config as $provider => $settings) {
-    $providers[$provider] = AdapterFactory::create($provider, $settings);
-}
+    /**
+     *
+     */
+    public function run()
+    {
+        // build array of providers
+        $providers = array();
+        foreach ($this->config as $provider => $settings) {
+            $providers[$provider] = AdapterFactory::create($provider, $settings);
+        }
 
-if (isset($_GET['code'])) {
+        $provider = isset($_GET['provider']) ? $_GET['provider'] : null;
+        if (array_key_exists($provider, $providers)) {
+            $provider = $providers[$provider];
+        } else {
+            $provider = null;
+        }
 
-    $provider = isset($_GET['provider']) ? $_GET['provider'] : null;
-    if (!array_key_exists($provider, $providers)) {
-        return;
+        if (empty($provider)) {
+            $this->printAuthList($providers);
+        } else {
+
+            $auther = new SocialAuther($provider);
+
+            if ($auther->authenticate($_GET)) {
+                $this->printAuthInfo($auther);
+            } else {
+                echo "Auth failed";
+            }
+        }
     }
 
-    $auther = new SocialAuther($providers[$provider]);
+    /**
+     * @param array $providers
+     */
+    protected function printAuthList(array $providers)
+    {
+        foreach ($providers as $provider) {
+            echo '<p><a href="' . $provider->getAuthenticationUrl() . '">Auth via ' . $provider->getProvider() . '</a></p>';
+        }
+    }
 
-    if ($auther->authenticate()) {
+    /**
+     * @param SocialAuther $auther
+     */
+    protected function printAuthInfo(SocialAuther $auther)
+    {
         if (!is_null($auther->getId()))
             echo "User ID: " . $auther->getId() . '<br />';
 
@@ -62,8 +95,7 @@ if (isset($_GET['code'])) {
         if (!is_null($auther->getAvatarUrl()))
             echo '<img src="' . $auther->getAvatarUrl() . '" />'; echo "<br />";
     }
-} else {
-    foreach ($providers as $provider) {
-        echo '<p><a href="' . $provider->getAuthenticationUrl() . '">Auth via ' . $provider->getProvider() . '</a></p>';
-    }
 }
+
+$example = new AuthExample();
+$example->run();

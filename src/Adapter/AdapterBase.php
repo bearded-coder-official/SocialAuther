@@ -281,6 +281,20 @@ abstract class AdapterBase implements AdapterInterface
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function getAuthenticationParams($params)
+    {
+        if (!isset($params['code'])) {
+            return false;
+        }
+
+        return array(
+            'code' => $params['code'],
+        );
+    }
+
+    /**
      * Make post request and return result
      *
      * @param string $url

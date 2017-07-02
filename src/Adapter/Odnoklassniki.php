@@ -65,41 +65,54 @@ class Odnoklassniki extends AdapterBase
     /**
      * {@inheritDoc}
      */
-    public function authenticate()
+    public function authenticate($params)
     {
-        $result = false;
-
-        if (isset($_GET['code'])) {
-            $params = array(
-                'code'          => $_GET['code'],
-                'redirect_uri'  => $this->redirectUri,
-                'grant_type'    => 'authorization_code',
-                'client_id'     => $this->clientId,
-                'client_secret' => $this->clientSecret
-            );
-
-            // Perform auth
-            $authInfo = $this->post('http://api.odnoklassniki.ru/oauth/token.do', $params);
-            if (isset($authInfo['access_token']) && isset($this->publicKey)) {
-                // Auth OK, can fetch additional info
-                $params = array(
-                    'method'          => 'users.getCurrentUser',
-                    'access_token'    => $authInfo['access_token'],
-                    'application_key' => $this->publicKey,
-                    'format'          => 'json',
-                    'sig'             => md5("application_key={$this->publicKey}format=jsonmethod=users.getCurrentUser" . md5("{$authInfo['access_token']}{$this->clientSecret}")),
-                );
-
-                // Fetch additional info
-                $userInfo = $this->get('http://api.odnoklassniki.ru/fb.do', $params);
-                if (isset($userInfo['uid'])) {
-                    $this->userInfo = $userInfo;
-                    $result = true;
-                }
-            }
+        if (!isset($this->publicKey)) {
+            // need to have own public key specified
+            return false;
         }
 
-        return $result;
+        $params = $this->getAuthenticationParams($params);
+        if (empty($params)) {
+            // no required params provided
+            return false;
+        }
+
+        $params = array(
+            'client_id'     => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'redirect_uri'  => $this->redirectUri,
+            'code'          => $params['code'],
+            'grant_type'    => 'authorization_code',
+        );
+
+        // Perform auth
+        $authInfo = $this->post('http://api.odnoklassniki.ru/oauth/token.do', $params);
+        if (!isset($authInfo['access_token'])) {
+            // something went wrong
+            return false;
+        }
+
+        // Auth OK, can fetch additional info
+        $params = array(
+            'method'          => 'users.getCurrentUser',
+            'access_token'    => $authInfo['access_token'],
+            'application_key' => $this->publicKey,
+            'format'          => 'json',
+            'sig'             => md5("application_key={$this->publicKey}format=jsonmethod=users.getCurrentUser" . md5("{$authInfo['access_token']}{$this->clientSecret}")),
+        );
+
+        // Fetch user info
+        $userInfo = $this->get('http://api.odnoklassniki.ru/fb.do', $params);
+        if (!isset($userInfo[$this->fieldsMap[static::ATTRIBUTE_ID]])) {
+            // something went wrong
+            return false;
+        }
+
+        // user info received
+        $this->userInfo = $userInfo;
+
+        return true;
     }
 
     /**
