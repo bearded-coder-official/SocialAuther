@@ -11,26 +11,26 @@
 
 namespace SocialAuther;
 
-use SocialAuther\Adapter\AdapterInterface;
+use SocialAuther\Provider\AuthProviderInterface;
 use SocialAuther\Exception\InvalidArgumentException;
 
 class SocialAuther
 {
     /**
-     * Instance of Adapter
+     * Instance of Provider
      *
-     * @var AdapterInterface
+     * @var AuthProviderInterface
      */
-    protected  $adapter = null;
+    protected  $provider = null;
 
     /**
      * Constructor.
      *
-     * @param AdapterInterface $adapter
+     * @param AuthProviderInterface $provider
      */
-    public function __construct(AdapterInterface $adapter)
+    public function __construct(AuthProviderInterface $provider)
     {
-        $this->adapter = $adapter;
+        $this->provider = $provider;
     }
 
     /**
@@ -42,12 +42,8 @@ class SocialAuther
      */
     public function __call($method, $params)
     {
-        if (method_exists($this, $method)) {
-            return call_user_func_array([$this, $method], $params);
-        }
-
-        if (method_exists($this->adapter, $method)) {
-            return call_user_func_array([$this->adapter, $method], $params);
+        if (method_exists($this->provider, $method)) {
+            return call_user_func_array([$this->provider, $method], $params);
         }
 
         throw new InvalidArgumentException("Unknown method " . __CLASS__ . "->$method()");

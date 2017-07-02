@@ -9,9 +9,9 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace SocialAuther\Adapter;
+namespace SocialAuther\Provider;
 
-interface AdapterInterface
+interface AuthProviderInterface
 {
     /**
      * Get authentication url for presenting to the user

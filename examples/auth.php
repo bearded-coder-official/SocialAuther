@@ -11,18 +11,18 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-use SocialAuther\Adapter\AdapterBase;
-use SocialAuther\Adapter\AdapterFactory;
+use SocialAuther\Provider\AuthProviderBase;
+use SocialAuther\Provider\AuthProviderFactory;
 use SocialAuther\SocialAuther;
 
 class AuthExample
 {
     // Social Auth settings
     protected $config = array(
-        AdapterBase::PROVIDER_VKONTAKTE => array(
+        AuthProviderBase::PROVIDER_VKONTAKTE => array(
             'client_id'     => '6097024',
             'client_secret' => 'Fzo6IqM8fMczAXycXpFl',
-            'redirect_uri'  => 'http://localhost/examples/auth.php?provider=' . AdapterBase::PROVIDER_VKONTAKTE,
+            'redirect_uri'  => 'http://localhost/examples/auth.php?provider=' . AuthProviderBase::PROVIDER_VKONTAKTE,
         ),
     );
 
@@ -34,7 +34,7 @@ class AuthExample
         // build array of providers
         $providers = array();
         foreach ($this->config as $provider => $settings) {
-            $providers[$provider] = AdapterFactory::create($provider, $settings);
+            $providers[$provider] = AuthProviderFactory::create($provider, $settings);
         }
 
         $provider = isset($_GET['provider']) ? $_GET['provider'] : null;

@@ -9,54 +9,37 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace SocialAuther\Adapter;
+namespace SocialAuther\Provider;
 
-class Odnoklassniki extends AdapterBase
+class Facebook extends AuthProviderBase
 {
-    /**
-     * Social Public Key
-     *
-     * @var string|null
-     */
-    protected $publicKey = null;
-
     /**
      * {@inheritDoc}
      */
-    protected $provider = self::PROVIDER_ODNOKLASSNIKI;
+    protected $provider = self::PROVIDER_FACEBOOK;
 
     /**
      * {@inheritDoc}
      */
     protected $fieldsMap = array(
         // local property name => external property name
-        self::ATTRIBUTE_ID         => 'uid',
-        self::ATTRIBUTE_EMAIL      => 'email',
-        self::ATTRIBUTE_NAME       => 'name',
-        self::ATTRIBUTE_AVATAR_URL => 'pic_2',
-        self::ATTRIBUTE_SEX        => 'gender',
-        self::ATTRIBUTE_BIRTHDAY   => 'birthday',
+        self::ATTRIBUTE_ID       => 'id',
+        self::ATTRIBUTE_EMAIL    => 'email',
+        self::ATTRIBUTE_NAME     => 'name',
+        self::ATTRIBUTE_PAGE_URL => 'link',
+        self::ATTRIBUTE_SEX      => 'gender',
+        self::ATTRIBUTE_BIRTHDAY => 'birthday',
     );
 
     /**
-     * {@inheritDoc}
-     */
-    protected $knownConfigParams = array(
-        'client_id',
-        'client_secret',
-        'redirect_uri',
-        'public_key',
-    );
-
-    /**
-     * Get user social id or null if it is not set
+     * Get url of user's avatar or null if it is not set
      *
      * @return string|null
      */
-    public function getPageUrl()
+    public function getAvatarUrl()
     {
-        if (isset($this->userInfo['uid'])) {
-            return 'http://www.odnoklassniki.ru/profile/' . $this->userInfo['uid'];
+        if (isset($this->userInfo['username'])) {
+            return "http://graph.facebook.com/{$this->userInfo['username']}/picture?type=large";
         }
 
         return null;
@@ -67,11 +50,6 @@ class Odnoklassniki extends AdapterBase
      */
     public function authenticate($params)
     {
-        if (!isset($this->publicKey)) {
-            // need to have own public key specified
-            return false;
-        }
-
         $params = $this->getAuthenticationParams($params);
         if (empty($params)) {
             // no required params provided
@@ -83,11 +61,10 @@ class Odnoklassniki extends AdapterBase
             'client_secret' => $this->clientSecret,
             'redirect_uri'  => $this->redirectUri,
             'code'          => $params['code'],
-            'grant_type'    => 'authorization_code',
         );
 
         // Perform auth
-        $authInfo = $this->post('http://api.odnoklassniki.ru/oauth/token.do', $params);
+        $authInfo = $this->post('https://graph.facebook.com/oauth/access_token', $params);
         if (!isset($authInfo['access_token'])) {
             // something went wrong
             return false;
@@ -95,15 +72,11 @@ class Odnoklassniki extends AdapterBase
 
         // Auth OK, can fetch additional info
         $params = array(
-            'method'          => 'users.getCurrentUser',
-            'access_token'    => $authInfo['access_token'],
-            'application_key' => $this->publicKey,
-            'format'          => 'json',
-            'sig'             => md5("application_key={$this->publicKey}format=jsonmethod=users.getCurrentUser" . md5("{$authInfo['access_token']}{$this->clientSecret}")),
+            'access_token' => $authInfo['access_token']
         );
 
         // Fetch user info
-        $userInfo = $this->get('http://api.odnoklassniki.ru/fb.do', $params);
+        $userInfo = $this->get('https://graph.facebook.com/me', $params);
         if (!isset($userInfo[$this->fieldsMap[static::ATTRIBUTE_ID]])) {
             // something went wrong
             return false;
@@ -121,11 +94,12 @@ class Odnoklassniki extends AdapterBase
     public function getAuthUrlComponents()
     {
         return array(
-            'auth_url'    => 'http://www.odnoklassniki.ru/oauth/authorize',
+            'auth_url'    => 'https://www.facebook.com/dialog/oauth',
             'auth_params' => array(
                 'client_id'     => $this->clientId,
+                'redirect_uri'  => $this->redirectUri,
                 'response_type' => 'code',
-                'redirect_uri'  => $this->redirectUri
+                'scope'         => 'email,user_birthday'
             )
         );
     }

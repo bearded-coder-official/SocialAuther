@@ -4,9 +4,9 @@
  * @author: Vladlen Grachev (https://github.com/gwer)
  * @author: sunsingerus (https://github.com/sunsingerus)
  */
-namespace SocialAuther\Adapter;
+namespace SocialAuther\Provider;
 
-class Twitter extends AdapterBase
+class Twitter extends AuthProviderBase
 {
     /**
      * {@inheritDoc}

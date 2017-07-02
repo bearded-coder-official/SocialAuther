@@ -9,11 +9,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace SocialAuther\Adapter;
+namespace SocialAuther\Provider;
 
 use SocialAuther\Exception\InvalidArgumentException;
 
-abstract class AdapterBase implements AdapterInterface
+abstract class AuthProviderBase implements AuthProviderInterface
 {
     const PROVIDER_FACEBOOK = 'fb';
     const PROVIDER_GOOGLE = 'google';

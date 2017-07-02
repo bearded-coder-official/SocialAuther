@@ -9,27 +9,42 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace SocialAuther\Adapter;
+namespace SocialAuther\Provider;
 
-class Yandex extends AdapterBase
+class Mailru extends AuthProviderBase
 {
     /**
      * {@inheritDoc}
      */
-    protected $provider = self::PROVIDER_YANDEX;
+    protected $provider = self::PROVIDER_MAILRU;
 
     /**
      * {@inheritDoc}
      */
     protected $fieldsMap = array(
-        self::ATTRIBUTE_ID         => 'id',
-        self::ATTRIBUTE_EMAIL      => 'default_email',
-        self::ATTRIBUTE_NAME       => 'real_name',
+        // local property name => external property name
+        self::ATTRIBUTE_ID         => 'uid',
+        self::ATTRIBUTE_EMAIL      => 'email',
+        self::ATTRIBUTE_NAME       => 'nick',
         self::ATTRIBUTE_PAGE_URL   => 'link',
-        self::ATTRIBUTE_AVATAR_URL => 'default_avatar_id',
-        self::ATTRIBUTE_SEX        => 'sex',
+        self::ATTRIBUTE_AVATAR_URL => 'pic_big',
         self::ATTRIBUTE_BIRTHDAY   => 'birthday',
     );
+
+    /**
+     * Get user sex or null if it is not set
+     *
+     * @return string|null
+     */
+    public function getSex()
+    {
+        if (isset($this->userInfo['sex'])) {
+            // gender is specified
+            return $this->userInfo['sex'] == 1 ? 'female' : 'male';
+        }
+
+        return null;
+    }
 
     /**
      * {@inheritDoc}
@@ -45,12 +60,13 @@ class Yandex extends AdapterBase
         $params = array(
             'client_id'     => $this->clientId,
             'client_secret' => $this->clientSecret,
+            'redirect_uri'  => $this->redirectUri,
             'code'          => $params['code'],
             'grant_type'    => 'authorization_code',
         );
 
         // Perform auth
-        $authInfo = $this->post('https://oauth.yandex.ru/token', $params);
+        $authInfo = $this->post('https://connect.mail.ru/oauth/token', $params);
         if (!isset($authInfo['access_token'])) {
             // something went wrong
             return false;
@@ -58,19 +74,22 @@ class Yandex extends AdapterBase
 
         // Auth OK, can fetch additional info
         $params = array(
-            'format'      => 'json',
-            'oauth_token' => $authInfo['access_token']
+            'method'      => 'users.getInfo',
+            'secure'      => '1',
+            'app_id'      => $this->clientId,
+            'session_key' => $authInfo['access_token'],
+            'sig'         => md5("app_id={$this->clientId}method=users.getInfosecure=1session_key={$authInfo['access_token']}{$this->clientSecret}"),
         );
 
         // Fetch user info
-        $userInfo = $this->get('https://login.yandex.ru/info', $params);
-        if (!isset($userInfo[$this->fieldsMap[static::ATTRIBUTE_ID]])) {
+        $userInfo = $this->get('http://www.appsmail.ru/platform/api', $params);
+        if (!isset($userInfo[0][$this->fieldsMap[static::ATTRIBUTE_ID]])) {
             // something went wrong
             return false;
         }
 
         // user info received
-        $this->userInfo = $userInfo;
+        $this->userInfo = array_shift($userInfo);
 
         return true;
     }
@@ -81,11 +100,11 @@ class Yandex extends AdapterBase
     public function getAuthUrlComponents()
     {
         return array(
-            'auth_url'    => 'https://oauth.yandex.ru/authorize',
+            'auth_url'    => 'https://connect.mail.ru/oauth/authorize',
             'auth_params' => array(
-                'response_type' => 'code',
                 'client_id'     => $this->clientId,
-                'display'       => 'popup'
+                'response_type' => 'code',
+                'redirect_uri'  => $this->redirectUri
             )
         );
     }
