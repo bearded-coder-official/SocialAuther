@@ -15,13 +15,23 @@ use SocialAuther\Exception\InvalidArgumentException;
 
 abstract class AuthProviderBase implements AuthProviderInterface
 {
-    const PROVIDER_FACEBOOK = 'fb';
-    const PROVIDER_GOOGLE = 'google';
-    const PROVIDER_MAILRU = 'mailru';
+    const PROVIDER_FACEBOOK      = 'fb';
+    const PROVIDER_GOOGLE        = 'google';
+    const PROVIDER_MAILRU        = 'mailru';
     const PROVIDER_ODNOKLASSNIKI = 'ok';
-    const PROVIDER_TWITTER = 'twitter';
-    const PROVIDER_VKONTAKTE = 'vk';
-    const PROVIDER_YANDEX = 'yandex';
+    const PROVIDER_TWITTER       = 'twitter';
+    const PROVIDER_VKONTAKTE     = 'vk';
+    const PROVIDER_YANDEX        = 'yandex';
+
+    protected static $providers = array(
+        self::PROVIDER_FACEBOOK      => 'facebook.com',
+        self::PROVIDER_GOOGLE        => 'google.com',
+        self::PROVIDER_MAILRU        => 'mail.ru',
+        self::PROVIDER_ODNOKLASSNIKI => 'ok.ru',
+        self::PROVIDER_TWITTER       => 'twitter.com',
+        self::PROVIDER_VKONTAKTE     => 'vk.com',
+        self::PROVIDER_YANDEX        => 'yandex.ru',
+    );
 
     /**
      * Social Client ID
@@ -148,6 +158,17 @@ abstract class AuthProviderBase implements AuthProviderInterface
 
         // all OK
         return true;
+    }
+
+    /**
+     * Check whether provider provider id/name is valid
+     *
+     * @param $provider name/id of the provider (One of AuthProviderBase::PROVIDER_*)
+     * @return bool
+     */
+    public static function isProviderValid($provider)
+    {
+        return array_key_exists($provider, static::$providers);
     }
 
     /**
