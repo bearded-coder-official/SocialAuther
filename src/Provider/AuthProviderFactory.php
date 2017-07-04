@@ -35,10 +35,10 @@ class AuthProviderFactory
     /**
      * Instantiate all available providers into static array
      *
-     * @param $config array of provider configuations
+     * @param $config array of provider configurations
      * @return array instances of all available providers
      */
-    public static function providers(array $config = array())
+    public static function init(array $config = array())
     {
         // build array of providers
         static::$providers = array();
@@ -50,6 +50,23 @@ class AuthProviderFactory
         }
 
         return static::$providers;
+    }
+
+    /**
+     * Get array of instances of all available providers
+     *
+     * @param $config array of provider configurations
+     * @return array instances of all available providers
+     */
+    public static function providers($config = null)
+    {
+        if (is_null($config)) {
+            // get previously built array of providers
+            return static::$providers;
+        }
+
+        // init array of providers from config
+        return static::init($config);
     }
 
     /**

@@ -32,20 +32,11 @@ class AuthExample
     public function run()
     {
         // build array of providers
-        $providers = array();
-        foreach ($this->config as $provider => $settings) {
-            $providers[$provider] = AuthProviderFactory::create($provider, $settings);
-        }
-
-        $provider = isset($_GET['provider']) ? $_GET['provider'] : null;
-        if (array_key_exists($provider, $providers)) {
-            $provider = $providers[$provider];
-        } else {
-            $provider = null;
-        }
+        AuthProviderFactory::init($this->config);
+        $provider = AuthProviderFactory::provider(isset($_GET['provider']) ? $_GET['provider'] : null);
 
         if (empty($provider)) {
-            $this->printAuthList($providers);
+            $this->printAuthList(AuthProviderFactory::providers());
         } else {
 
             $auther = new SocialAuther($provider);
@@ -64,7 +55,7 @@ class AuthExample
     protected function printAuthList(array $providers)
     {
         foreach ($providers as $provider) {
-            echo '<p><a href="' . $provider->getAuthenticationUrl() . '">Auth via ' . $provider->getProvider() . '</a></p>';
+            echo '<p><a href="' . $provider->getAuthenticationUrl() . '">Auth via ' . $provider->getProviderName() . '</a></p>';
         }
     }
 

@@ -265,13 +265,26 @@ abstract class AuthProviderBase implements AuthProviderInterface
     }
 
     /**
-     * Return name of auth provider
+     * Return provider's name/id
      *
      * @return string
      */
     public function getProvider()
     {
         return $this->provider;
+    }
+
+    /**
+     * Get user-friendly name of the provider
+     *
+     * @param null $provider provider's name/id (One of AuthProviderBase::PROVIDER_*)
+     *
+     * @return string|null
+     */
+    public function getProviderName($provider = null)
+    {
+        $provider = empty($provider) ? $this->provider : $provider;
+        return array_key_exists($provider, static::$providers) ? static::$providers[$provider] : null;
     }
 
     /**
