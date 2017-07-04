@@ -83,9 +83,9 @@ class Yandex extends AuthProviderBase
         return array(
             'auth_url'    => 'https://oauth.yandex.ru/authorize',
             'auth_params' => array(
-                'response_type' => 'code',
                 'client_id'     => $this->clientId,
-                'display'       => 'popup'
+                'response_type' => 'code',
+                'display'       => 'popup',
             )
         );
     }

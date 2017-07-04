@@ -103,8 +103,8 @@ class Mailru extends AuthProviderBase
             'auth_url'    => 'https://connect.mail.ru/oauth/authorize',
             'auth_params' => array(
                 'client_id'     => $this->clientId,
+                'redirect_uri'  => $this->redirectUri,
                 'response_type' => 'code',
-                'redirect_uri'  => $this->redirectUri
             )
         );
     }

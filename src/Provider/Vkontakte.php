@@ -144,9 +144,9 @@ class Vkontakte extends AuthProviderBase
             'auth_url'    => 'http://oauth.vk.com/authorize',
             'auth_params' => array(
                 'client_id'     => $this->clientId,
-                'scope'         => 'notify,email',
                 'redirect_uri'  => $this->redirectUri,
-                'response_type' => 'code'
+                'response_type' => 'code',
+                'scope'         => 'notify,email',
             )
         );
     }
