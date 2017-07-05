@@ -35,7 +35,7 @@ class Twitter extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getPageUrl()
+    public function getUserPageUrl()
     {
         if (isset($this->userInfo['screen_name'])) {
             return 'http://twitter.com/' . $this->userInfo['screen_name'];
@@ -49,7 +49,7 @@ class Twitter extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getAvatarUrl()
+    public function getUserAvatarUrl()
     {
         if (isset($this->userInfo['profile_image_url'])) {
             return implode('', explode('_normal', $this->userInfo['profile_image_url']));

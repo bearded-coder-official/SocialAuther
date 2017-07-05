@@ -11,18 +11,16 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-use SocialAuther\Provider\AuthProviderBase;
-use SocialAuther\Provider\AuthProviderFactory;
-use SocialAuther\SocialAuther;
+use SocialAuther\SocialAuth;
 
 class AuthExample
 {
     // Social Auth settings
     protected $config = array(
-        AuthProviderBase::PROVIDER_VKONTAKTE => array(
+        SocialAuth::PROVIDER_VKONTAKTE => array(
             'client_id'     => '6097024',
             'client_secret' => 'Fzo6IqM8fMczAXycXpFl',
-            'redirect_uri'  => 'http://localhost/examples/auth.php?provider=' . AuthProviderBase::PROVIDER_VKONTAKTE,
+            'redirect_uri'  => 'http://localhost/examples/auth.php?provider=' . SocialAuth::PROVIDER_VKONTAKTE,
         ),
     );
 
@@ -31,60 +29,59 @@ class AuthExample
      */
     public function run()
     {
-        // build array of providers
-        AuthProviderFactory::init($this->config);
-        $provider = AuthProviderFactory::provider(isset($_GET['provider']) ? $_GET['provider'] : null);
+        $auth = new SocialAuth($this->config);
 
-        if (empty($provider)) {
-            $this->printAuthList(AuthProviderFactory::providers());
+        if (!$auth->initProvider(isset($_GET['provider']) ? $_GET['provider'] : null)) {
+            // can't initialize provider from specified _GET params
+            $this->printAuthList($auth->getProvidersInfo());
+
+        } elseif ($auth->authenticate($_GET)) {
+            // can initialize provider from specified _GET params
+            // and auth went OK
+            $this->printAuthInfo($auth->getUserInfo());
+
         } else {
-
-            $auther = new SocialAuther($provider);
-
-            if ($auther->authenticate($_GET)) {
-                $this->printAuthInfo($auther);
-            } else {
-                echo "Auth failed";
-            }
+            // can initialize provider from specified _GET params
+            // and auth FAILED
+            echo "Auth failed";
         }
     }
 
     /**
-     * @param array $providers
+     * @param array $info
      */
-    protected function printAuthList(array $providers)
+    protected function printAuthList(array $info)
     {
-        foreach ($providers as $provider) {
-            echo '<p><a href="' . $provider->getAuthenticationUrl() . '">Auth via ' . $provider->getProviderName() . '</a></p>';
+        foreach ($info as $id => $provider) {
+            echo "<p>$id : <a href='{$provider['url']}'>Auth via {$provider['name']}</a></p>";
         }
     }
 
     /**
-     * @param SocialAuther $auther
+     * @param SocialAuth $auther
      */
-    protected function printAuthInfo(SocialAuther $auther)
+    protected function printAuthInfo(array $info)
     {
-        if (!is_null($auther->getId()))
-            echo "User ID: " . $auther->getId() . '<br />';
+        if (!is_null($info[SocialAuth::ATTRIBUTE_ID]))
+            echo "User ID: {$info[SocialAuth::ATTRIBUTE_ID]}<br />";
 
-        if (!is_null($auther->getName()))
-            echo "Name: " . $auther->getName() . '<br />';
+        if (!is_null($info[SocialAuth::ATTRIBUTE_NAME]))
+            echo "Name: {$info[SocialAuth::ATTRIBUTE_NAME]}<br />";
 
-        if (!is_null($auther->getEmail()))
-            echo "Email: " . $auther->getEmail() . '<br />';
+        if (!is_null($info[SocialAuth::ATTRIBUTE_EMAIL]))
+            echo "Email: {$info[SocialAuth::ATTRIBUTE_EMAIL]}<br />";
 
-        if (!is_null($auther->getPageUrl()))
-            echo "Page URL: " . $auther->getPageUrl() . '<br />';
+        if (!is_null($info[SocialAuth::ATTRIBUTE_PAGE_URL]))
+            echo "Page URL: <a href='{$info[SocialAuth::ATTRIBUTE_PAGE_URL]}'>{$info[SocialAuth::ATTRIBUTE_PAGE_URL]}</a><br />";
 
-        if (!is_null($auther->getSex()))
-            echo "Gender: " . $auther->getSex() . '<br />';
+        if (!is_null($info[SocialAuth::ATTRIBUTE_SEX]))
+            echo "Gender: {$info[SocialAuth::ATTRIBUTE_SEX]}<br />";
 
-        if (!is_null($auther->getBirthday()))
-            echo "Birthday: " . $auther->getBirthday() . '<br />';
+        if (!is_null($info[SocialAuth::ATTRIBUTE_BIRTHDAY]))
+            echo "Birthday: {$info[SocialAuth::ATTRIBUTE_BIRTHDAY]}<br />";
 
-        // аватар пользователя
-        if (!is_null($auther->getAvatarUrl()))
-            echo '<img src="' . $auther->getAvatarUrl() . '" />'; echo "<br />";
+        if (!is_null($info[SocialAuth::ATTRIBUTE_AVATAR_URL]))
+            echo "<img src='{$info[SocialAuth::ATTRIBUTE_AVATAR_URL]}' /><br />";
     }
 }
 

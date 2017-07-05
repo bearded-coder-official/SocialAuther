@@ -36,7 +36,7 @@ class Facebook extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getAvatarUrl()
+    public function getUserAvatarUrl()
     {
         if (isset($this->userInfo['username'])) {
             return "http://graph.facebook.com/{$this->userInfo['username']}/picture?type=large";

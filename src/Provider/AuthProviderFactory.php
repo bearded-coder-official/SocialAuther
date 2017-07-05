@@ -70,9 +70,9 @@ class AuthProviderFactory
     }
 
     /**
-     * Get provider by its name/id (One of AuthProviderBase::PROVIDER_*)
+     * Get provider by its name/id (One of AuthProviderInterface::PROVIDER_*)
      *
-     * @param null $provider name/id of the provider (One of AuthProviderBase::PROVIDER_*)
+     * @param null $provider name/id of the provider (One of AuthProviderInterface::PROVIDER_*)
      * @return mixed|null provider instance, if available
      */
     public static function provider($provider = null)
@@ -81,9 +81,9 @@ class AuthProviderFactory
     }
 
     /**
-     * Create instance of provider by its name/id (One of AuthProviderBase::PROVIDER_*)
+     * Create instance of provider by its name/id (One of AuthProviderInterface::PROVIDER_*)
      *
-     * @param $provider provider name/id (One of AuthProviderBase::PROVIDER_*)
+     * @param $provider provider name/id (One of AuthProviderInterface::PROVIDER_*)
      * @param array $config configuration for provider to be created
      * @return mixed|null provider, if able to instansiate
      */

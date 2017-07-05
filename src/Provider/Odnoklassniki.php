@@ -53,7 +53,7 @@ class Odnoklassniki extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getPageUrl()
+    public function getUserPageUrl()
     {
         if (isset($this->userInfo['uid'])) {
             return 'http://www.odnoklassniki.ru/profile/' . $this->userInfo['uid'];

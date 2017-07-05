@@ -11,8 +11,17 @@
 
 namespace SocialAuther\Provider;
 
-interface AuthProviderInterface
+interface AuthProviderInterface extends AuthProviderEnum
 {
+    /**
+     * Get provider's name/id
+     *
+     * @param null $provider provider's name/id (One of AuthProviderInterface::PROVIDER_*)
+     *
+     * @return string
+     */
+    public function getName($provider = null);
+
     /**
      * Get authentication url for presenting to the user
      *

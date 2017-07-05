@@ -34,7 +34,7 @@ class Vkontakte extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getName()
+    public function getUserName()
     {
         if (isset($this->userInfo['first_name']) && isset($this->userInfo['last_name'])) {
             // both first and last name
@@ -60,7 +60,7 @@ class Vkontakte extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getPageUrl()
+    public function getuserPageUrl()
     {
         if (isset($this->userInfo['screen_name'])) {
             // screen name is available - can build URL
@@ -75,7 +75,7 @@ class Vkontakte extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getSex()
+    public function getUserSex()
     {
         if (isset($this->userInfo['sex'])) {
             // gender is specified

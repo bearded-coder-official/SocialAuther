@@ -36,7 +36,7 @@ class Google extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getBirthday()
+    public function getUserBirthday()
     {
         if (isset($this->userInfo['birthday'])) {
             $this->userInfo['birthday'] = str_replace('0000', date('Y'), $this->userInfo['birthday']);

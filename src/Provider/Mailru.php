@@ -36,7 +36,7 @@ class Mailru extends AuthProviderBase
      *
      * @return string|null
      */
-    public function getSex()
+    public function getUserSex()
     {
         if (isset($this->userInfo['sex'])) {
             // gender is specified

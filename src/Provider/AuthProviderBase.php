@@ -15,14 +15,6 @@ use SocialAuther\Exception\InvalidArgumentException;
 
 abstract class AuthProviderBase implements AuthProviderInterface
 {
-    const PROVIDER_FACEBOOK      = 'fb';
-    const PROVIDER_GOOGLE        = 'google';
-    const PROVIDER_MAILRU        = 'mailru';
-    const PROVIDER_ODNOKLASSNIKI = 'ok';
-    const PROVIDER_TWITTER       = 'twitter';
-    const PROVIDER_VKONTAKTE     = 'vk';
-    const PROVIDER_YANDEX        = 'yandex';
-
     protected static $providers = array(
         self::PROVIDER_FACEBOOK      => 'facebook.com',
         self::PROVIDER_GOOGLE        => 'google.com',
@@ -60,15 +52,6 @@ abstract class AuthProviderBase implements AuthProviderInterface
      * @var string null
      */
     protected $provider = null;
-
-    const ATTRIBUTE_ID         = 'socialId';
-    const ATTRIBUTE_EMAIL      = 'email';
-    const ATTRIBUTE_NAME       = 'name';
-    const ATTRIBUTE_PAGE_URL   = 'socialPage';
-    const ATTRIBUTE_AVATAR_URL = 'avatar';
-    const ATTRIBUTE_SEX        = 'sex';
-    const ATTRIBUTE_BIRTHDAY   = 'birthday';
-
 
     /**
      * Social Fields Map for universal keys
@@ -163,7 +146,7 @@ abstract class AuthProviderBase implements AuthProviderInterface
     /**
      * Check whether provider provider id/name is valid
      *
-     * @param $provider name/id of the provider (One of AuthProviderBase::PROVIDER_*)
+     * @param $provider name/id of the provider (One of AuthProviderInterface::PROVIDER_*)
      * @return bool
      */
     public static function isProviderValid($provider)
@@ -190,11 +173,29 @@ abstract class AuthProviderBase implements AuthProviderInterface
     }
 
     /**
+     * Return all user info available
+     *
+     * @return array
+     */
+    public function getUserInfo()
+    {
+        return array(
+            static::ATTRIBUTE_ID         => $this->getUserId(),
+            static::ATTRIBUTE_EMAIL      => $this->getUserEmail(),
+            static::ATTRIBUTE_NAME       => $this->getUserName(),
+            static::ATTRIBUTE_PAGE_URL   => $this->getUserPageUrl(),
+            static::ATTRIBUTE_AVATAR_URL => $this->getUserAvatarUrl(),
+            static::ATTRIBUTE_SEX        => $this->getUserSex(),
+            static::ATTRIBUTE_BIRTHDAY   => $this->getUserBirthday(),
+        );
+    }
+
+    /**
      * Get user social id or null if it is not set
      *
      * @return string|null
      */
-    public function getId()
+    public function getUserId()
     {
         return $this->getUserAttribute(static::ATTRIBUTE_ID);
     }
@@ -204,7 +205,7 @@ abstract class AuthProviderBase implements AuthProviderInterface
      *
      * @return string|null
      */
-    public function getEmail()
+    public function getUserEmail()
     {
         return $this->getUserAttribute(static::ATTRIBUTE_EMAIL);
     }
@@ -214,7 +215,7 @@ abstract class AuthProviderBase implements AuthProviderInterface
      *
      * @return string|null
      */
-    public function getName()
+    public function getUserName()
     {
         return $this->getUserAttribute(static::ATTRIBUTE_NAME);
     }
@@ -223,7 +224,7 @@ abstract class AuthProviderBase implements AuthProviderInterface
      * Get user social page url or null if it is not set
      * @return string|null
      */
-    public function getPageUrl()
+    public function getUserPageUrl()
     {
         return $this->getUserAttribute(static::ATTRIBUTE_PAGE_URL);
     }
@@ -233,7 +234,7 @@ abstract class AuthProviderBase implements AuthProviderInterface
      *
      * @return string|null
      */
-    public function getAvatarUrl()
+    public function getUserAvatarUrl()
     {
         return $this->getUserAttribute(static::ATTRIBUTE_AVATAR_URL);
     }
@@ -243,7 +244,7 @@ abstract class AuthProviderBase implements AuthProviderInterface
      *
      * @return string|null
      */
-    public function getSex()
+    public function getUserSex()
     {
         return $this->getUserAttribute(static::ATTRIBUTE_SEX);
     }
@@ -253,7 +254,7 @@ abstract class AuthProviderBase implements AuthProviderInterface
      *
      * @return string|null
      */
-    public function getBirthday()
+    public function getUserBirthday()
     {
         $result = $this->getUserAttribute(static::ATTRIBUTE_BIRTHDAY);
 
@@ -277,11 +278,11 @@ abstract class AuthProviderBase implements AuthProviderInterface
     /**
      * Get user-friendly name of the provider
      *
-     * @param null $provider provider's name/id (One of AuthProviderBase::PROVIDER_*)
+     * @param null $provider provider's name/id (One of AuthProviderInterface::PROVIDER_*)
      *
      * @return string|null
      */
-    public function getProviderName($provider = null)
+    public function getName($provider = null)
     {
         $provider = empty($provider) ? $this->provider : $provider;
         return array_key_exists($provider, static::$providers) ? static::$providers[$provider] : null;
