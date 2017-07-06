@@ -33,6 +33,7 @@ class AuthExample
 
         if (!$auth->initProvider(isset($_GET['provider']) ? $_GET['provider'] : null)) {
             // can't initialize provider from specified _GET params
+            // this means no auth params provided - want to display list of available auth URLs
             $this->printAuthList($auth->getProvidersInfo());
 
         } elseif ($auth->authenticate($_GET)) {
