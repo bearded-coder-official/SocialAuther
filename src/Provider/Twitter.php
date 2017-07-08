@@ -4,7 +4,7 @@
  * @author: Vladlen Grachev (https://github.com/gwer)
  * @author: sunsingerus (https://github.com/sunsingerus)
  */
-namespace SocialAuther\Provider;
+namespace SocialAuth\Provider;
 
 class Twitter extends AuthProviderBase
 {

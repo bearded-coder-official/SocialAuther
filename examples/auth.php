@@ -11,9 +11,9 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-use SocialAuther\SocialAuth;
+use SocialAuth\SocialAuth;
 
-class AuthExample
+class SocialAuthExample
 {
     // Social Auth settings
     protected $config = array(
@@ -86,5 +86,5 @@ class AuthExample
     }
 }
 
-$example = new AuthExample();
+$example = new SocialAuthExample();
 $example->run();

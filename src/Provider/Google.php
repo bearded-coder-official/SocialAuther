@@ -9,7 +9,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace SocialAuther\Provider;
+namespace SocialAuth\Provider;
 
 class Google extends AuthProviderBase
 {

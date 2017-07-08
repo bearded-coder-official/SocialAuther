@@ -9,9 +9,9 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace SocialAuther\Provider;
+namespace SocialAuth\Provider;
 
-use SocialAuther\Exception\InvalidArgumentException;
+use SocialAuth\Exception\InvalidArgumentException;
 
 abstract class AuthProviderBase implements AuthProviderInterface
 {

@@ -9,12 +9,12 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace SocialAuther;
+namespace SocialAuth;
 
-use SocialAuther\Provider\AuthProviderEnum;
-use SocialAuther\Provider\AuthProviderInterface;
-use SocialAuther\Provider\AuthProviderFactory;
-use SocialAuther\Exception\InvalidArgumentException;
+use SocialAuth\Provider\AuthProviderEnum;
+use SocialAuth\Provider\AuthProviderInterface;
+use SocialAuth\Provider\AuthProviderFactory;
+use SocialAuth\Exception\InvalidArgumentException;
 
 class SocialAuth implements AuthProviderEnum
 {
@@ -57,7 +57,7 @@ class SocialAuth implements AuthProviderEnum
             return;
         }
 
-        throw new InvalidArgumentException("Unknown parf for constuctor " . __CLASS__);
+        throw new InvalidArgumentException("Unknown param for constructor " . __CLASS__);
     }
 
     /**
@@ -134,7 +134,7 @@ class SocialAuth implements AuthProviderEnum
     /**
      * Assign providers' config
      *
-     * @param array $config array of Proders' config
+     * @param array $config array of Providers' config
      */
     public function setConfig(array $config)
     {
@@ -143,7 +143,7 @@ class SocialAuth implements AuthProviderEnum
     }
 
     /**
-     * Call either local or adapter's method
+     * Call either local or provider's method
      *
      * @param $method
      * @param $params
