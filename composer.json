@@ -1,10 +1,10 @@
 {
-  "name": "sunsingerus/SocialAuther",
+  "name": "sunsingerus/social-auth",
   "description": "Authentication via Social Networks",
   "minimum-stability": "stable",
   "version": "0.2",
   "license": "GPL",
-  "homepage": "https://github.com/sunsingerus/SocialAuther",
+  "homepage": "https://github.com/sunsingerus/social-auth",
   "type": "project",
   "keywords": ["auth", "social network"],
 
