@@ -77,7 +77,16 @@ class AuthProviderFactory
      */
     public static function provider($provider = null)
     {
-        return array_key_exists($provider, static::$providers) ? static::$providers[$provider] : null;
+        if (empty($provider)) {
+            return null;
+        }
+
+        if (array_key_exists($provider, static::$providers)) {
+            // known provider
+            return static::$providers[$provider];
+        }
+        
+        return null;
     }
 
     /**
