@@ -28,8 +28,8 @@ class Facebook extends AbstractAdapter
     public function getAvatar()
     {
         $result = null;
-        if (isset($this->userInfo['username'])) {
-            $result = 'http://graph.facebook.com/' . $this->userInfo['username'] . '/picture?type=large';
+        if (isset($this->userInfo['id'])) {
+            $result = 'http://graph.facebook.com/' . $this->userInfo['id'] . '/picture?type=large';
         }
 
         return $result;
@@ -52,11 +52,15 @@ class Facebook extends AbstractAdapter
                 'code'          => $_GET['code']
             );
 
-            parse_str($this->get('https://graph.facebook.com/oauth/access_token', $params, false), $tokenInfo);
+            $tokenInfo = json_decode($this->get('https://graph.facebook.com/oauth/access_token', $params, false));
 
-            if (count($tokenInfo) > 0 && isset($tokenInfo['access_token'])) {
-                $params = array('access_token' => $tokenInfo['access_token']);
-                $userInfo = $this->get('https://graph.facebook.com/me', $params);
+            if (count($tokenInfo) > 0 && isset($tokenInfo->access_token)) { 
+                $params = array(
+                    'access_token' => $tokenInfo->access_token,
+                    'fields'=> 'id,name,email'
+				);
+                                
+                $userInfo = $this->get('https://graph.facebook.com/v2.5/me', $params);
 
                 if (isset($userInfo['id'])) {
                     $this->userInfo = $userInfo;
@@ -81,7 +85,7 @@ class Facebook extends AbstractAdapter
                 'client_id'     => $this->clientId,
                 'redirect_uri'  => $this->redirectUri,
                 'response_type' => 'code',
-                'scope'         => 'email,user_birthday'
+                'scope'         => 'email, public_profile'
             )
         );
     }
