@@ -9,10 +9,12 @@ class Vk extends AbstractAdapter
         parent::__construct($config);
 
         $this->socialFieldsMap = array(
-            'socialId'   => 'uid',
+            'socialId'   => 'id',
             'email'      => 'email',
             'avatar'     => 'photo_big',
-            'birthday'   => 'bdate'
+            'birthday'   => 'bdate',
+            'firstName' => 'first_name',
+            'lastName'  => 'last_name'
         );
 
         $this->provider = 'vk';
@@ -89,13 +91,14 @@ class Vk extends AbstractAdapter
             $tokenInfo = $this->get('https://oauth.vk.com/access_token', $params);
             if (isset($tokenInfo['access_token'])) {
                 $params = array(
-                    'uids'         => $tokenInfo['user_id'],
+                    'user_id'      => $tokenInfo['user_id'],
                     'fields'       => 'uid,first_name,last_name,screen_name,sex,bdate,photo_big',
-                    'access_token' => $tokenInfo['access_token']
+                    'access_token' => $tokenInfo['access_token'],
+                    'v'            => '5.92',
                 );
 
                 $userInfo = $this->get('https://api.vk.com/method/users.get', $params);
-                if (isset($userInfo['response'][0]['uid'])) {
+                if (isset($userInfo['response'][0]['id'])) {
                     $this->userInfo = $userInfo['response'][0];
                     $result = true;
                 }
@@ -118,7 +121,8 @@ class Vk extends AbstractAdapter
                 'client_id'     => $this->clientId,
                 'scope'         => 'notify',
                 'redirect_uri'  => $this->redirectUri,
-                'response_type' => 'code'
+                'response_type' => 'code',
+                'v'             => '5.92',
             )
         );
     }
